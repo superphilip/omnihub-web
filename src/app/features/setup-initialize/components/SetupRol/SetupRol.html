@@ -1,0 +1,31 @@
+<section>
+  <div class="flex items-center gap-4 mb-6">
+    <h2 class="text-[11px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">
+      Configuración del Rol
+    </h2>
+    <div class="h-px w-full bg-gray-200 opacity-50"></div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <custom-input
+      [label]="'Nombre del rol'"
+      [placeholder]="'Ej: SUPER_ADMIN, GERENTE_GENERAL, etc'"
+      [control]="controls().roleName">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    </custom-input>
+
+    <custom-input
+      [label]="'Descripción del rol'"
+      [placeholder]="'Descripción'"
+      [control]="controls().description">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>
+    </custom-input>
+
+  </div>
+</section>

@@ -1,0 +1,44 @@
+<section class="w-full block">
+  <div class="flex items-center gap-4 mb-6">
+    <h2 class="text-[11px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">
+      Usuario Administrador Inicial
+    </h2>
+    <div class="h-px w-full bg-gray-200 opacity-50"></div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+    <custom-input [label]="'Nombres'" [placeholder]="'Nombres'" [control]="controls().firstName">
+      <i class="fa fa-user"></i>
+    </custom-input>
+
+    <custom-input [label]="'Apellidos'" [placeholder]="'Apellidos'" [control]="controls().lastName">
+        <i class="fa fa-user"></i>
+    </custom-input>
+
+    <custom-input [label]="'Documento'" [placeholder]="'Documento'" [control]="controls().idNumber">
+      <i class="fa fa-id-card"></i>
+    </custom-input>
+
+    <custom-input [label]="'Nombre de usuario'" [placeholder]="'Nombre de usuario'" [control]="controls().userName"
+      [showIcon]="true">
+      <span input-icon>
+        <i class="fa fa-user"></i>
+      </span>
+      <button type="button" (click)="generateUserName()" input-addon class="btn join-item rounded-r-full text-white text-xs uppercase bg-[#3178C6] hover:bg-[#2B5797] disabled:bg-gray-400">
+        Generar usuario
+      </button>
+    </custom-input>
+
+    <custom-input [label]="'Email'" [placeholder]="'Email'" [control]="controls().email">
+      <i class="fa fa-envelope"></i>
+    </custom-input>
+
+    <custom-input [label]="'Teléfono'" [placeholder]="'Celular'" [control]="controls().phone">
+      <i class="fa fa-phone"></i>
+    </custom-input>
+
+    <custom-input [label]="'Contraseña'" [type]="'password'" [placeholder]="'••••••••'" [control]="controls().password">
+      <i class="fa fa-lock"></i>
+    </custom-input>
+  </div>
+</section>

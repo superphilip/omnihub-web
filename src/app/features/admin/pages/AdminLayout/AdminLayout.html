@@ -1,0 +1,9 @@
+<div class="min-h-screen bg-gray-50/50">
+  <app-sidebar #sidebar></app-sidebar>
+  <div class="p-4 xl:ml-80">
+    <app-navbar (onMenuClick)="sidebar.openSidebar()" ></app-navbar>
+  </div>
+  <div class="mt-12">
+      <router-outlet />
+    </div>
+</div>

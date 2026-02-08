@@ -1,6 +1,7 @@
 {
   "name": "omnihub-app",
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -27,22 +28,33 @@
     "@angular/common": "^21.1.0",
     "@angular/compiler": "^21.1.0",
     "@angular/core": "^21.1.0",
-    "@angular/forms": "^21.1.0",
+    "@angular/forms": "^21.1.2",
     "@angular/platform-browser": "^21.1.0",
     "@angular/platform-server": "^21.1.0",
     "@angular/router": "^21.1.0",
     "@angular/ssr": "^21.1.1",
+    "@ngneat/overview": "^7.0.0",
+    "@tailwindcss/cli": "^4.1.18",
+    "@tanstack/angular-query-experimental": "^5.90.25",
+    "daisyui": "^5.5.17",
     "express": "^5.1.0",
+    "ngx-toastr": "^20.0.5",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "unique-names-generator": "^4.7.1"
   },
   "devDependencies": {
     "@angular/build": "^21.1.1",
     "@angular/cli": "^21.1.1",
     "@angular/compiler-cli": "^21.1.0",
+    "@tailwindcss/postcss": "^4.1.18",
+    "@tanstack/angular-query-devtools-experimental": "^5.87.5",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
+    "autoprefixer": "^10.4.24",
     "jsdom": "^27.1.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   }

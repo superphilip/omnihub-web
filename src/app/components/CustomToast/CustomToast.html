@@ -1,0 +1,30 @@
+<div class="toast toast-top toast-end z-100 p-4">
+  @if (toastService.toasts().length) {
+    @for (toast of toastService.toasts(); track toast.id) {
+      <div class="alert shadow-2xl border-none text-white min-w-75 mb-3"
+        [class.alert-success]="toast.type === 'success'"
+        [class.alert-error]="toast.type === 'error'"
+        [style.backgroundColor]="toast.type === 'success' ? '#46C392' : '#F87171'">
+        <div class="flex items-center gap-3">
+          @if (toast.type === 'success') {
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="stroke-current shrink-0 h-6 w-6"
+                 fill="none" viewBox="0 0 24 24"
+                 [attr.aria-label]="'Cerrar'"
+                 style="cursor:pointer"
+                 (click)="toastService.close(toast.id)">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
+          <span class="font-bold tracking-wide">{{ toast.text }}</span>
+        </div>
+      </div>
+    }
+  }
+</div>

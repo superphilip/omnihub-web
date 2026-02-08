@@ -1,0 +1,59 @@
+<div class="form-control w-full">
+  <label class="label pb-1">
+    <span class="label-text font-medium text-base-content/70 text-xs">{{ label() }}</span>
+  </label>
+  @if (showIcon()) {
+  <div class="flex join items-center w-full gap-2">
+    <span class="icon-container"
+      [class.text-error]="controlSignal().invalid && (controlSignal().touched || controlSignal().dirty)"
+        [class.text-success]="controlSignal().valid && controlSignal().touched"
+        [class.text-base-content/30]="!controlSignal().touched">
+      <ng-content select="[input-icon]"></ng-content>
+    </span>
+    <input class="input join-item transition-all duration-200 w-full"
+      [class.input-bordered]="!controlSignal().touched && !controlSignal().dirty"
+      [class.input-error]="controlSignal().invalid && (controlSignal().touched || controlSignal().dirty)"
+      [class.input-success]="controlSignal().valid && controlSignal().touched" [type]="type()"
+      [formControl]="controlSignal()" [placeholder]="placeholder()" [attr.pattern]="pattern() || null"
+      [attr.minlength]="minlength() || null" [attr.maxlength]="maxlength() || null" [attr.title]="title() || null"
+      autocomplete="off" />
+    <ng-content select="[input-addon]"></ng-content>
+  </div>
+  }
+  @else {
+    <div class="flex items-center w-full gap-2">
+      <span class="icon-container"
+        [class.text-error]="controlSignal().invalid && (controlSignal().touched || controlSignal().dirty)"
+        [class.text-success]="controlSignal().valid && controlSignal().touched"
+        [class.text-base-content/30]="!controlSignal().touched">
+        <ng-content></ng-content>
+      </span>
+      <input class="input w-full transition-all duration-200"
+        [class.input-bordered]="!controlSignal().touched && !controlSignal().dirty"
+        [class.input-error]="controlSignal().invalid && (controlSignal().touched || controlSignal().dirty)"
+        [class.input-success]="controlSignal().valid && controlSignal().touched" [type]="type()" [type]="type()"
+        [formControl]="controlSignal()" [placeholder]="placeholder()" [attr.pattern]="pattern() || null"
+        [attr.minlength]="minlength() || null" [attr.maxlength]="maxlength() || null" [attr.title]="title() || null"
+        autocomplete="off" />
+    </div>
+  }
+
+  @if (hint()) {
+  <div class="text-gray-500 text-[11px] mt-1 italic opacity-70">
+    {{ hint() }}
+  </div>
+  }
+
+  @if (controlSignal() && controlSignal().invalid && (controlSignal().touched || controlSignal().dirty)) {
+  <div class="text-error text-xs mt-1 font-semibold">
+    @for (key of objectKeys(controlSignal().errors ?? {}); track key) {
+    <span>{{ controlSignal().errors![key]?.message || 'Campo inválido' }}</span>
+    }
+  </div>
+  }
+  @else if (controlSignal() && controlSignal().valid && controlSignal().touched) {
+  <div class="text-green-600 font-semibold text-xs mt-1">
+    ¡Correcto!
+  </div>
+  }
+</div>
