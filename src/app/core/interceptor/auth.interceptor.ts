@@ -97,10 +97,10 @@ export class AuthInterceptor implements HttpInterceptor {
   // --- Helpers para localStorage y JWT ---
 
   private getToken(): string | null {
-    return localStorage.getItem('token'); // accede con 'Bearer ...'
+    return localStorage.getItem('accessToken'); // accede con 'Bearer ...'
   }
   private setToken(token: string) {
-    localStorage.setItem('token', token);
+    localStorage.setItem('accessToken', token);
   }
   private getRefreshToken(): string | null {
     return localStorage.getItem('refreshToken');
@@ -110,7 +110,7 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   private logout() {
-    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     this.router.navigate(['/login']);
   }

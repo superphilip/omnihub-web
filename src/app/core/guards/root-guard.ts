@@ -2,7 +2,7 @@ import { inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CanActivateFn, Router } from '@angular/router';
 import { ApiService } from '../services/api.service';
-import { map, catchError, of } from 'rxjs';
+import { map, catchError, of, timeout } from 'rxjs';
 
 type SetupStatusResponse = { success: boolean; data: { needsSetup: boolean } };
 
@@ -22,17 +22,26 @@ export const RootGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const platformId = inject(PLATFORM_ID);
 
-  // Solo acceder a localStorage si estamos en browser (no en SSR)
   let token = '';
   let loggedIn = false;
 
   if (isPlatformBrowser(platformId)) {
-    token = localStorage.getItem('token') ?? '';
-    loggedIn = !!token && !isTokenExpired(token);
+    token = localStorage.getItem('accessToken') ?? '';
+    if (token) {
+      loggedIn = !isTokenExpired(token);
+      try {
+        const pureToken = token.startsWith('Bearer ') ? token.slice(7) : token;
+        const payload = JSON.parse(atob(pureToken.split('.')[1]));
+        console.log('PAYLOAD JWT:', payload);
+        console.log('LOGGEDIN?', loggedIn);
+      } catch {
+        console.log('JWT mal formado');
+      }
+    }
   }
 
-  // Consulta el estado de setup
   return api.get<SetupStatusResponse>('setup/status').pipe(
+    timeout({ each: 5000 }),
     map(res => {
       const needsSetup = res.data?.needsSetup;
       console.log('[ROOT GUARD]', { needsSetup, loggedIn });
@@ -41,10 +50,13 @@ export const RootGuard: CanActivateFn = (route, state) => {
         return router.createUrlTree(['/setup']);
       }
       if (loggedIn) {
-        return router.createUrlTree(['/admin']);
+        return true; // Permite acceder a /admin
       }
-      return router.createUrlTree(['/auth/login']);
+      return router.createUrlTree(['/auth/login']); // Usuario sin sesión va a login
     }),
-    catchError(() => of(router.createUrlTree(['/auth/login'])))
+    catchError(err => {
+      console.error('[ROOT GUARD ERROR]', err);
+      return of(router.createUrlTree(['/auth/login']));
+    })
   );
 };

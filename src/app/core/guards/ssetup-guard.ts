@@ -5,7 +5,7 @@ import { map, catchError, of } from 'rxjs';
 
 type SetupStatusResponse = { success: boolean; data: { needsSetup: boolean } };
 
-export const SetupGuard: CanActivateFn = (route, state) => {
+export const setupGuard: CanActivateFn = (route, state) => {
   const api = inject(ApiService);
   const router = inject(Router);
 

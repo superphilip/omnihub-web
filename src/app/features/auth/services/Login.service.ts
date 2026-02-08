@@ -19,7 +19,7 @@ export class LoginService {
     },
     onSuccess: (res) => {
       if (res?.accessToken && res?.refreshToken) {
-        localStorage.setItem('token', res.accessToken);
+        localStorage.setItem('accessToken', res.accessToken);
         localStorage.setItem('refreshToken', res.refreshToken);
       }
       console.log('Servidor respondió OK:', res);
@@ -34,7 +34,7 @@ export class LoginService {
   }));
 
   logout() {
-    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
   }
 }

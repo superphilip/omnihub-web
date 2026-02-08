@@ -3,7 +3,7 @@ import Root from '@components/Root/Root';
 import { AuthGuard } from '@core/guards/auth-guard';
 import { PublicGuard } from '@core/guards/public-guard';
 import { RootGuard } from '@core/guards/root-guard';
-import { SetupGuard } from '@core/guards/ssetup-guard';
+import { setupGuard } from '@core/guards/ssetup-guard';
 
 
 export const routes: Routes = [
@@ -14,7 +14,7 @@ export const routes: Routes = [
   },
   {
     path: 'setup',
-    canActivate: [SetupGuard],
+    canActivate: [setupGuard],
     loadComponent: () => import('./features/setup-initialize/pages/setup-initialize/setup-initialize')
   },
   {
