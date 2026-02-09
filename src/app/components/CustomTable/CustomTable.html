@@ -1,0 +1,95 @@
+<div class="overflow-x-auto">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>
+          <input
+            type="checkbox"
+            class="checkbox"
+            [checked]="isAllSelected()"
+            (change)="toggleSelectAll($event.target.checked)"
+          />
+        </th>
+        @for (col of columns(); track col) {
+          <th
+            (click)="setSort(col)"
+            class="cursor-pointer select-none"
+          >
+            {{ col.label }}
+            @if (col.sortable && sortKey() === col.key) {
+              <span>{{ sortDir() === 'asc' ? '▲' : '▼' }}</span>
+            }
+          </th>
+        }
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of visualRows(); track row) {
+        <tr>
+          <td>
+            <input
+              type="checkbox"
+              class="checkbox"
+              [checked]="selectedRows().has($index)"
+              (change)="toggleSelectRow($index)"
+            />
+          </td>
+          @for (col of columns(); track col) {
+            <td [class]="col.cellClass ?? ''">
+              {{ getCellValue(row, col) }}
+            </td>
+          }
+          <td>
+            <button
+              class="btn btn-ghost btn-xs"
+              (click)="details.emit(row)"
+            >
+              details
+            </button>
+          </td>
+        </tr>
+      }
+      @if (visualRows().length === 0) {
+        <tr>
+          <td [attr.colspan]="columns().length + 2" class="text-center text-gray-400">
+            Sin registros.
+          </td>
+        </tr>
+      }
+    </tbody>
+    <tfoot>
+      <tr>
+        <td></td>
+        @for (col of columns(); track col) {
+          <td>{{ col.label }}</td>
+        }
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+  @if (meta() && meta()!.totalPages > 1) {
+    <div class="flex items-center justify-between mt-4">
+      <div class="text-sm">
+        Página {{ meta()!.page }} de {{ meta()!.totalPages }} — Total: {{ meta()!.total }}
+      </div>
+      <div class="flex gap-2">
+        <button
+          class="btn btn-sm"
+          [disabled]="meta()!.page <= 1"
+          (click)="goToPage(meta()!.page - 1)"
+        >
+          ‹
+        </button>
+        <span class="mx-2">{{ meta()!.page }}</span>
+        <button
+          class="btn btn-sm"
+          [disabled]="meta()!.page >= meta()!.totalPages"
+          (click)="goToPage(meta()!.page + 1)"
+        >
+          ›
+        </button>
+      </div>
+    </div>
+  }
+</div>

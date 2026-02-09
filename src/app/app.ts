@@ -11,13 +11,4 @@ import { CustomToast } from "@components/CustomToast/CustomToast";
 })
 export class App {
   protected readonly title = signal('omnihub-app');
-  loading = true;
-  constructor(private router: Router) {
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationStart) this.loading = true;
-      if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
-        this.loading = false;
-      }
-    });
-  }
 }

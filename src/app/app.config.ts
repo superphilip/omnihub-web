@@ -3,8 +3,10 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-experimental';
+import { AuthInterceptor } from '@core/interceptor/auth.interceptor';
+
 
 
 export const appConfig: ApplicationConfig = {
@@ -13,8 +15,9 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes), provideClientHydration(withEventReplay()),
     provideHttpClient(
       withFetch(),
-      withInterceptorsFromDi()
+      withInterceptors([AuthInterceptor])
     ),
+
     provideTanStackQuery(new QueryClient())
   ]
 };

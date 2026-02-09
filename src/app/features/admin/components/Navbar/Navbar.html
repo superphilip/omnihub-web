@@ -1,37 +1,23 @@
-<nav class="block w-full max-w-full text-black shadow-none rounded-xl transition-all px-0 py-1">
-  <div class="flex flex-col-reverse justify-between gap-6 md:flex-row md:items-center">
-    <div class="flex items-center">
-      <div class="mr-auto md:mr-4 md:w-56">
-        <div class="relative w-full min-w-50 h-10">
-          <select class="select appearance-none">
-            <option></option>
-            <option>Crimson</option>
-            <option>Amber</option>
-            <option>Velvet</option>
-          </select>
-        </div>
-      </div>
-      <button (click)="onMenuClick.emit()"
-        class="relative middle none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-10 h-10 max-h-10 rounded-lg text-xs text-gray-500 hover:bg-blue-gray-500/10 active:bg-blue-gray-500/30 grid xl:hidden"
-        type="button">
-        <span class="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
-            stroke-width="3" class="h-6 w-6 text-blue-gray-500">
-            <path fill-rule="evenodd"
-              d="M3 6.75A.75.75 0 013.75 6h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 6.75zM3 12a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 12zm0 5.25a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75z"
-              clip-rule="evenodd"></path>
-          </svg>
-        </span>
-      </button>
-      <a href="#">
-        <button
-          class="relative middle none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-10 h-10 max-h-10 rounded-lg text-xs text-gray-500 hover:bg-blue-gray-500/10 active:bg-blue-gray-500/30 grid xl:hidden"
-          type="button">
-          <span class="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2">
-          </span>
-        </button>
-      </a>
+<nav class="w-full bg-transparent px-0 py-2">
+  <div class="flex items-center justify-between w-full">
 
+    <div class="flex-none w-64">
+      <select class="w-full h-10 px-3 bg-white border border-gray-300 rounded-lg focus:outline-none appearance-none cursor-pointer">
+        <option value=""></option>
+        <option>Crimson</option>
+        <option>Amber</option>
+        <option>Velvet</option>
+      </select>
     </div>
+
+    <div
+      (click)="onMenuClick.emit()"
+      class="relative z-60 flex items-center justify-center w-15 h-15 rounded-lg cursor-pointer transition-all hover:bg-gray-100 active:bg-gray-200 group"
+    >
+      <span class="absolute inset-0 z-20 bg-transparent"></span>
+
+      <i class="fa-solid fa-bars text-2xl text-gray-600 pointer-events-none z-10"></i>
+    </div>
+
   </div>
 </nav>

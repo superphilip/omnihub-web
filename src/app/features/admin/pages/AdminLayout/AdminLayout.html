@@ -1,9 +1,13 @@
-<div class="min-h-screen bg-gray-50/50">
+<div class="min-h-screen bg-gray-50/50 flex flex-col">
   <app-sidebar #sidebar></app-sidebar>
-  <div class="p-4 xl:ml-80">
-    <app-navbar (onMenuClick)="sidebar.openSidebar()" ></app-navbar>
-  </div>
-  <div class="mt-12">
+
+  <div class="p-4 w-full flex-1 flex flex-col">
+
+    <app-navbar (onMenuClick)="sidebar.toggleSidebar()"></app-navbar>
+
+    <div class="mt-8 flex-1">
       <router-outlet />
     </div>
+
+  </div>
 </div>
