@@ -8,7 +8,7 @@ import { SetupHeader } from "../../components/SetupHeader/SetupHeader";
 
 import { SetupRol } from "../../components/SetupRol/SetupRol";
 import { SetupAdmin } from "../../components/SetupAdmin/SetupAdmin";
-import { email, minLength, required, minWords, onlyNumbers, validAddress, robustPassword, roleFormat } from 'src/app/utils/validation.utils';
+import { email, minLength, required, minWords, onlyNumbers, validAddress, robustPassword,} from 'src/app/utils/validation.utils';
 import { SetupCompany } from '../../components/SetupHeader/SetupCompany/SetupCompany';
 import { normalizeBackendErrors } from 'src/app/utils/error.utils';
 import { Router } from '@angular/router';
@@ -30,7 +30,7 @@ export default class SetupInitialize {
     companyEmail: ['', [required(), email()]],
     companyPhone: ['', [required(), onlyNumbers(6, 'El teléfono debe contener solo números y tener al menos 6 dígitos')]],
     companyAddress: ['', [required(), validAddress(10)]],
-    primaryRoleName: ['', [required(), roleFormat()]],
+    primaryRoleName: ['', [required()]],
     primaryRoleDescription: ['', required()],
     adminFirstName: ['', [required(), minWords(2, 'Ingresa al menos dos nombres')]],
     adminLastName: ['', [required(), minWords(2, 'Ingresa al menos dos apellidos')]],

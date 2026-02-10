@@ -3,8 +3,8 @@ export interface Role {
   name: string;
   description?: string;
   isSystemRole: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 

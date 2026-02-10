@@ -1,95 +1,72 @@
-<div class="overflow-x-auto">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>
-          <input
-            type="checkbox"
-            class="checkbox"
-            [checked]="isAllSelected()"
-            (change)="toggleSelectAll($event.target.checked)"
-          />
-        </th>
-        @for (col of columns(); track col) {
-          <th
-            (click)="setSort(col)"
-            class="cursor-pointer select-none"
-          >
-            {{ col.label }}
-            @if (col.sortable && sortKey() === col.key) {
-              <span>{{ sortDir() === 'asc' ? '▲' : '▼' }}</span>
-            }
+<div class="flex items-center justify-between mb-6">
+
+<div class="bg-white shadow-sm overflow-visible">
+  <div class="overflow-x-auto overflow-y-visible">
+    <table class="table w-full border-separate border-spacing-0">
+      <thead>
+        <tr class="bg-gray-50/50">
+          <th class="w-12 border-b border-gray-100 py-4 px-4">
+            <input type="checkbox" class="checkbox checkbox-sm" [checked]="isAllSelected()"
+              (change)="toggleSelectAll($any($event.target).checked)" />
           </th>
-        }
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (row of visualRows(); track row) {
-        <tr>
-          <td>
-            <input
-              type="checkbox"
-              class="checkbox"
-              [checked]="selectedRows().has($index)"
-              (change)="toggleSelectRow($index)"
-            />
-          </td>
-          @for (col of columns(); track col) {
-            <td [class]="col.cellClass ?? ''">
-              {{ getCellValue(row, col) }}
-            </td>
+          @for (col of visibleColumns(); track col.key) {
+          <th (click)="setSort(col)"
+            class="cursor-pointer select-none text-[#2B5797] font-bold uppercase text-[11px] tracking-wider border-b border-gray-100 py-4 px-4">
+            <div class="flex items-center gap-1">
+              {{ col.label }}
+              @if (sortKey() === col.key) {
+              <span class="text-blue-500">{{ sortDir() === 'asc' ? '▲' : '▼' }}</span>
+              }
+            </div>
+          </th>
           }
-          <td>
-            <button
-              class="btn btn-ghost btn-xs"
-              (click)="details.emit(row)"
-            >
-              details
-            </button>
+          <th class="text-center text-[#2B5797] font-bold uppercase text-[11px] border-b border-gray-100 pr-6">SHARES
+          </th>
+        </tr>
+      </thead>
+      <tbody class="overflow-visible">
+        @for (row of visualRows(); track row; let i = $index) {
+        <tr class="hover:bg-blue-50/30 transition-colors border-b border-gray-50 overflow-visible">
+          <td class="py-4 px-4">
+            <input type="checkbox" class="checkbox checkbox-sm" [checked]="selectedRows().has(i)"
+              (change)="toggleSelectRow(i)" />
+          </td>
+          @for (col of visibleColumns(); track col.key) {
+          <td class="text-sm text-gray-600 py-4 px-4">
+            {{ getCellValue(row, col) | autoCell:col.key }}
+          </td>
+          }
+          <td class="text-left py-4 pr-4 overflow-visible">
+            <div class="dropdown dropdown-end">
+              <div tabindex="0" role="button"
+                class="btn btn-ghost btn-xs text-[#2B5797] hover:bg-blue-100 font-bold px-2 flex items-center gap-1">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+                <span class="text-[10px] tracking-wider">Options</span>
+              </div>
+              <ul tabindex="0" class="dropdown-content menu p-1 shadow-2xl bg-white rounded-xl w-48 z-150
+               border border-gray-100 mt-2 fixed right-0 mr-8">
+
+                <li
+                  class="menu-title text-gray-400 text-[10px] uppercase tracking-widest px-4 py-2 border-b border-gray-50 mb-1">
+                  Gestión
+                </li>
+
+                @for (option of menuOptions(); track option.label) {
+                <li>
+                  <a [routerLink]="[option.link]" routerLinkActive="bg-blue-50 text-[#2B5797] font-semibold"
+                    [routerLinkActiveOptions]="{ exact: option.exact || false }"
+                    [class]="option.class || 'text-gray-700 hover:text-[#2B5797] hover:bg-blue-50'">
+                    <i class="{{ option.icon }} opacity-60"></i>
+                    {{ option.label }}
+                  </a>
+                </li>
+                }
+              </ul>
+            </div>
           </td>
         </tr>
-      }
-      @if (visualRows().length === 0) {
-        <tr>
-          <td [attr.colspan]="columns().length + 2" class="text-center text-gray-400">
-            Sin registros.
-          </td>
-        </tr>
-      }
-    </tbody>
-    <tfoot>
-      <tr>
-        <td></td>
-        @for (col of columns(); track col) {
-          <td>{{ col.label }}</td>
         }
-        <td></td>
-      </tr>
-    </tfoot>
-  </table>
-  @if (meta() && meta()!.totalPages > 1) {
-    <div class="flex items-center justify-between mt-4">
-      <div class="text-sm">
-        Página {{ meta()!.page }} de {{ meta()!.totalPages }} — Total: {{ meta()!.total }}
-      </div>
-      <div class="flex gap-2">
-        <button
-          class="btn btn-sm"
-          [disabled]="meta()!.page <= 1"
-          (click)="goToPage(meta()!.page - 1)"
-        >
-          ‹
-        </button>
-        <span class="mx-2">{{ meta()!.page }}</span>
-        <button
-          class="btn btn-sm"
-          [disabled]="meta()!.page >= meta()!.totalPages"
-          (click)="goToPage(meta()!.page + 1)"
-        >
-          ›
-        </button>
-      </div>
-    </div>
-  }
+      </tbody>
+    </table>
+  </div>
 </div>

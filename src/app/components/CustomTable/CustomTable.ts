@@ -1,4 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AutoCellPipe } from '@core/pipes/AutoCell.pipe';
+import { CustomInput } from "@components/CustomInput/CustomInput";
+
 
 export type SortDir = 'asc' | 'desc';
 
@@ -17,16 +21,86 @@ export interface CustomTableMeta {
   totalPages: number;
 }
 
+interface TableAction {
+  label: string;
+  icon: string;
+  event?: 'delete' | 'details' | 'edit'; // Eventos para acciones manuales
+  link?: string;                         // Ruta para navegación
+  class?: string;
+  exact?: boolean;                       // Para routerLinkActiveOptions
+}
+
+export interface BaseEntity {
+  id: string | number;
+}
+
 @Component({
   selector: 'custom-table',
-  imports: [],
+  imports: [AutoCellPipe, RouterLink, RouterLinkActive],
   templateUrl: './CustomTable.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CustomTable<T extends object> {
+export class CustomTable<T extends BaseEntity> {
+  details = output<T>();
+  edit = output<T>();
+  delete = output<T>();
+
+  menuOptions = signal<TableAction[]>([
+    {
+      label: 'Editar',
+      icon: 'fa-solid fa-pen-to-square',
+      event: 'edit', // Esto es para que el componente sepa que es una acción manual
+      class: 'text-blue-500 font-bold hover:bg-blue-50',
+      link: '/edit', // Esto es para que el componente genere un routerLink
+      exact: true,
+
+    },
+    {
+      label: 'Detalles',
+      icon: 'fa-solid fa-circle-info',
+      event: 'details',
+      class: 'text-green-500 font-bold hover:bg-green-50',
+      link: '/details',
+      exact: true,
+    },
+    {
+      label: 'Eliminar',
+      icon: 'fa-solid fa-trash-can',
+      event: 'delete', // Este sigue siendo un evento (abre un modal de confirmación)
+      class: 'text-red-500 font-bold hover:bg-red-50',
+      link: '/delete',
+      exact: true,
+    }
+  ]);
+
+
+
+  getRowId(row: T): string | number {
+    return row.id; // Funciona porque T ahora extiende de BaseEntity
+  }
+
+  handleAction(event: 'edit' | 'details' | 'delete' | undefined, row: any) {
+    if (!event) return; // Si es un link puro, no hace nada por evento
+
+    switch (event) {
+      case 'edit':
+        this.edit.emit(row);
+        break;
+      case 'details':
+        this.details.emit(row);
+        break;
+      case 'delete':
+        this.delete.emit(row);
+        break;
+    }
+  }
+
   rows = input<readonly T[]>([]);
   columns = input<readonly CustomTableColumn<T>[]>([]);
+  hiddenColumns = signal<Set<string>>(new Set());
   meta = input<CustomTableMeta | null>(null);
+  Label = input<string>('Titulo por defecto');
+  SubLabel = input<string>('Description por defecto');
 
   selectedRows = signal<Set<number>>(new Set<number>());
   selectAll = signal(false);
@@ -36,6 +110,10 @@ export class CustomTable<T extends object> {
 
   isAllSelected = computed(() =>
     this.rows().length > 0 && this.rows().every((_, i) => this.selectedRows().has(i))
+  );
+
+  readonly visibleColumns = computed(() =>
+    this.columns().filter(col => !this.hiddenColumns().has(col.key))
   );
 
   visualRows = computed<readonly T[]>(() => {
@@ -52,14 +130,13 @@ export class CustomTable<T extends object> {
           return va.localeCompare(vb) * direction;
         } else if (va instanceof Date && vb instanceof Date) {
           return (va.getTime() - vb.getTime()) * direction;
-    }
+        }
         return 0;
       });
     }
     return arr;
   });
-
-  details = output<T>();
+  create = output<void>();
   checkedChange = output<readonly T[]>();
   pageChange = output<number>();
   sortChange = output<{ key: keyof T & string; dir: SortDir }>();
@@ -79,6 +156,15 @@ export class CustomTable<T extends object> {
     this.selectedRows.set(sel);
     this.selectAll.set(this.rows().length > 0 && this.rows().every((_, i) => sel.has(i)));
     this.checkedChange.emit(this.rows().filter((_, i) => sel.has(i)));
+  }
+
+  toggleColumn(key: string) {
+    this.hiddenColumns.update(set => {
+      const copy = new Set(set);
+      if (copy.has(key)) copy.delete(key);
+      else copy.add(key);
+      return copy;
+    });
   }
 
   setSort(col: CustomTableColumn<T>) {

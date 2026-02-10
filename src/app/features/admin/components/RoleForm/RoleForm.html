@@ -1,0 +1,34 @@
+<form [formGroup]="formGroup()" (ngSubmit)="onSubmit()" class="space-y-4" autocomplete="off">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <custom-input
+      [label]="'Nombre del rol'"
+      [placeholder]="'Rol'"
+      [control]="controls().name">
+      <i class="fa-regular fa-address-book"></i>
+    </custom-input>
+
+    <custom-input
+      [label]="'Descripción'"
+      [placeholder]="'Descripción del rol'"
+      [control]="controls().description">
+      <i class="fa-solid fa-file-waveform"></i>
+    </custom-input>
+  </div>
+
+  <label class="flex items-center gap-2">
+    <input type="checkbox" formControlName="isSystemRole" class="checkbox checkbox-success" />
+    <span class="text-emerald-500">Es rol del sistema</span>
+  </label>
+
+  <div class="flex justify-end gap-3 pt-2">
+    <button type="button" class="btn text-white bg-[#2B5797] hover:bg-[#1e3e6d] disabled:bg-gray-400" (click)="cancel.emit()" [disabled]="pending()">Cancelar</button>
+    <button type="submit" [disabled]="pending()" class="btn text-white bg-[#2B5797] hover:bg-[#1e3e6d] disabled:bg-gray-400 min-w-28">
+      @if (pending()) {
+        <span class="loading loading-spinner loading-sm"></span>
+        <span class="ml-2">Guardando...</span>
+      } @else {
+        <span>Guardar</span>
+      }
+    </button>
+  </div>
+</form>

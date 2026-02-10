@@ -60,21 +60,6 @@ export function validAddress(minLen = 10, message?: string): ValidatorFn {
   };
 }
 
-export function roleFormat(message?: string): ValidatorFn {
-  return (control: AbstractControl) => {
-    const value = control.value || '';
-    if (!value) return null;
-
-    // Solo permite letras MAYÚSCULAS y guiones bajos
-    // No permite espacios, minúsculas ni otros símbolos
-    const isValid = /^[A-Z_]+$/.test(value);
-
-    const defaultMsg = 'El rol debe estar en MAYÚSCULAS y usar guiones bajos (ej. SUPER_ADMIN)';
-
-    return !isValid ? { roleFormat: { message: message || defaultMsg } } : null;
-  };
-}
-
 export function robustPassword(minLen = 8, message?: string): ValidatorFn {
   return (control: AbstractControl) => {
     const value = control.value || '';

@@ -1,18 +1,57 @@
 @if (loading) {
-<custom-loading message="Cargando roles..."></custom-loading>
+  <custom-loading message="Cargando roles..."></custom-loading>
 } @else {
   <div class="flex flex-col gap-4">
-    <h1 class="text-xl font-bold text-gray-800">Gestión de Roles</h1>
+
+    <custom-header-table
+      [title]="'GESTOR DE ROLES'"
+      [subtitle]="'Gestiona y visualiza los roles del sistema'"
+      [search]="search()"
+      (requestOpen)="openAdd()"
+      (searchChange)="onSearchChange($event)">
+
+      <!-- Inyectamos el menú de columnas en el slot del header -->
+      <div header-tools>
+        <custom-columns-visible
+          [columns]="allColumns()"
+          [hidden]="hiddenColumns()"
+          (toggle)="toggleColumn($event)"
+          (showAll)="showAllColumns()"
+          (hideAll)="hideAllColumns()">
+        </custom-columns-visible>
+      </div>
+    </custom-header-table>
 
     <div class="w-full overflow-x-auto border border-gray-100 rounded-xl bg-white shadow-sm">
-      <custom-table [rows]="roles" [columns]="columns()" [meta]="meta" (pageChange)="setPage($event)"></custom-table>
+      <custom-table
+        [rows]="rows"
+        [columns]="columns()"
+        [meta]="meta"
+        (pageChange)="setPage($event)">
+      </custom-table>
     </div>
   </div>
 
-  @if (fetching && roles.length === 0) {
-  <div class="text-center py-20 text-gray-400">
-    <i class="fa-solid fa-folder-open text-3xl mb-2"></i>
-    <p>No hay roles para mostrar.</p>
-  </div>
+  @if (fetching && rows.length === 0) {
+    <div class="text-center py-20 text-gray-400">
+      <i class="fa-solid fa-folder-open text-3xl mb-2"></i>
+      <p>No hay roles para mostrar.</p>
+    </div>
   }
 }
+
+<!-- Modal y formulario manejados en Roles (padre) -->
+<custom-modal
+  [open]="adding()"
+  [title]="'Nuevo rol'"
+  (close)="closeAdd()">
+  <div modal-body>
+    <role-form
+      [formGroup]="form"
+      [pending]="createMutation.isPending()"
+      (submitForm)="submitRole($event)"
+      (cancel)="closeAdd()">
+    </role-form>
+  </div>
+  <div modal-footer></div>
+</custom-modal>

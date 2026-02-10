@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CustomInput } from '@components/CustomInput/CustomInput';
+import { formatRoleName } from 'src/app/utils/role.utils';
 
 
 @Component({
@@ -15,4 +16,16 @@ export class SetupRol {
     roleName: this.formGroup().get('primaryRoleName') as FormControl,
     description: this.formGroup().get('primaryRoleDescription') as FormControl,
   }));
+  constructor() {
+    effect(() => {
+      const nameControl = this.controls().roleName;
+      if (!nameControl) return;
+      nameControl.valueChanges.subscribe(value => {
+        const formatted = formatRoleName(value);
+        if (value !== formatted) {
+          nameControl.setValue(formatted, { emitEvent: false });
+        }
+      });
+    });
+  }
 }

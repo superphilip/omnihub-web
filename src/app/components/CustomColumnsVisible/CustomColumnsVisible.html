@@ -1,0 +1,32 @@
+<div class="dropdown dropdown-end">
+  <label tabindex="0"
+         class="btn btn-sm text-white bg-[#2B5797] hover:bg-[#1e3e6d] border-none shadow-md cursor-pointer">
+    <i class="fa-solid fa-table-columns mr-2"></i> Columnas
+  </label>
+
+  <ul tabindex="0"
+      class="dropdown-content menu p-2 shadow-2xl bg-white rounded-box w-56 z-150 mt-2 border border-gray-100">
+    <li class="menu-title text-gray-500 text-[10px] uppercase tracking-widest px-4 py-2">Visibilidad</li>
+
+    @for (col of columns(); track col.key) {
+      <li>
+        <label class="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded-md px-2">
+          <input
+            type="checkbox"
+            class="checkbox checkbox-xs checkbox-primary"
+            [checked]="!hidden().has(col.key)"
+            (change)="toggle.emit(col.key)" />
+          <span class="text-sm text-gray-600 font-medium">{{ col.label }}</span>
+        </label>
+      </li>
+    }
+
+    <li><div class="h-px bg-gray-100 my-2"></div></li>
+    <li class="px-2">
+      <div class="flex gap-2">
+        <button class="btn btn-xs" (click)="showAll.emit()">Mostrar todo</button>
+        <button class="btn btn-xs" (click)="hideAll.emit()">Ocultar todo</button>
+      </div>
+    </li>
+  </ul>
+</div>
