@@ -6,11 +6,12 @@
     <custom-header-table
       [title]="'GESTOR DE ROLES'"
       [subtitle]="'Gestiona y visualiza los roles del sistema'"
-      [search]="search()"
+      [search]="searchHuman()"
       (requestOpen)="openAdd()"
-      (searchChange)="onSearchChange($event)">
+      (searchChange)="onSearchChange($event)"
+      (searchSubmit)="forceSearchNow()"
+      (searchBlur)="forceSearchNow()">              <!-- Blur: dispara inmediato -->
 
-      <!-- Inyectamos el menú de columnas en el slot del header -->
       <div header-tools>
         <custom-columns-visible
           [columns]="allColumns()"
@@ -27,8 +28,17 @@
         [rows]="rows"
         [columns]="columns()"
         [meta]="meta"
-        (pageChange)="setPage($event)">
+        (pageChange)="setPage($event)"
+        (sortChange)="onSort($event)">
       </custom-table>
+
+      @if (meta) {
+        <div class="px-6 py-2 text-xs text-gray-500">
+          Mostrando
+          <span class="font-semibold text-[#2B5797]">{{ rangeStart }}</span>–<span class="font-semibold text-[#2B5797]">{{ rangeEnd }}</span>
+          de <span class="font-semibold text-[#2B5797]">{{ meta.total }}</span>
+        </div>
+      }
     </div>
   </div>
 
@@ -40,11 +50,7 @@
   }
 }
 
-<!-- Modal y formulario manejados en Roles (padre) -->
-<custom-modal
-  [open]="adding()"
-  [title]="'Nuevo rol'"
-  (close)="closeAdd()">
+<custom-modal [open]="adding()" [title]="'Nuevo rol'" (close)="closeAdd()">
   <div modal-body>
     <role-form
       [formGroup]="form"

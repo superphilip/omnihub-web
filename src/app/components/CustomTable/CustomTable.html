@@ -1,72 +1,132 @@
-<div class="flex items-center justify-between mb-6">
+<div class="overflow-x-auto">
+  <table class="table w-full border-separate border-spacing-0">
+    <thead>
+      <tr class="bg-gray-50/50">
+        <th class="w-12 border-b border-gray-100 py-4 px-6">
+          <input
+            type="checkbox"
+            class="checkbox checkbox-sm"
+            [checked]="isAllSelected()"
+            (change)="toggleSelectAll($any($event.target).checked)" />
+        </th>
 
-<div class="bg-white shadow-sm overflow-visible">
-  <div class="overflow-x-auto overflow-y-visible">
-    <table class="table w-full border-separate border-spacing-0">
-      <thead>
-        <tr class="bg-gray-50/50">
-          <th class="w-12 border-b border-gray-100 py-4 px-4">
-            <input type="checkbox" class="checkbox checkbox-sm" [checked]="isAllSelected()"
-              (change)="toggleSelectAll($any($event.target).checked)" />
-          </th>
-          @for (col of visibleColumns(); track col.key) {
-          <th (click)="setSort(col)"
-            class="cursor-pointer select-none text-[#2B5797] font-bold uppercase text-[11px] tracking-wider border-b border-gray-100 py-4 px-4">
+        @for (col of visibleColumns(); track col.key) {
+          <th
+            (click)="setSort(col)"
+            class="cursor-pointer select-none text-[#2B5797] font-bold uppercase text-[11px] tracking-wider border-b border-gray-100 py-4 px-6">
             <div class="flex items-center gap-1">
               {{ col.label }}
               @if (sortKey() === col.key) {
-              <span class="text-blue-500">{{ sortDir() === 'asc' ? '▲' : '▼' }}</span>
+                <span class="text-[#2B5797]">{{ sortDir() === 'asc' ? '▲' : '▼' }}</span>
               }
             </div>
           </th>
-          }
-          <th class="text-center text-[#2B5797] font-bold uppercase text-[11px] border-b border-gray-100 pr-6">SHARES
-          </th>
-        </tr>
-      </thead>
-      <tbody class="overflow-visible">
-        @for (row of visualRows(); track row; let i = $index) {
-        <tr class="hover:bg-blue-50/30 transition-colors border-b border-gray-50 overflow-visible">
-          <td class="py-4 px-4">
-            <input type="checkbox" class="checkbox checkbox-sm" [checked]="selectedRows().has(i)"
+        }
+
+        <th class="text-center text-[#2B5797] font-bold uppercase text-[11px] border-b border-gray-100 py-4 pr-6">
+          SHARES
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      @for (row of visualRows(); track getRowId(row); let i = $index) {
+        <tr class="hover:bg-blue-50/30 transition-colors border-b border-gray-50">
+          <td class="py-4 px-6">
+            <input
+              type="checkbox"
+              class="checkbox checkbox-sm"
+              [checked]="selectedRows().has(i)"
               (change)="toggleSelectRow(i)" />
           </td>
+
           @for (col of visibleColumns(); track col.key) {
-          <td class="text-sm text-gray-600 py-4 px-4">
-            {{ getCellValue(row, col) | autoCell:col.key }}
-          </td>
+            <td class="text-sm text-gray-600 py-4 px-6">
+              {{ getCellValue(row, col) | autoCell:col.key }}
+            </td>
           }
-          <td class="text-left py-4 pr-4 overflow-visible">
+
+          <td class="text-left py-4 pr-6">
             <div class="dropdown dropdown-end">
               <div tabindex="0" role="button"
-                class="btn btn-ghost btn-xs text-[#2B5797] hover:bg-blue-100 font-bold px-2 flex items-center gap-1">
+                   class="btn btn-ghost btn-xs text-[#2B5797] hover:bg-blue-100 font-bold px-2 flex items-center gap-1">
                 <i class="fa-solid fa-ellipsis-vertical"></i>
                 <span class="text-[10px] tracking-wider">Options</span>
               </div>
-              <ul tabindex="0" class="dropdown-content menu p-1 shadow-2xl bg-white rounded-xl w-48 z-150
-               border border-gray-100 mt-2 fixed right-0 mr-8">
-
-                <li
-                  class="menu-title text-gray-400 text-[10px] uppercase tracking-widest px-4 py-2 border-b border-gray-50 mb-1">
+              <ul tabindex="0"
+                  class="dropdown-content menu p-1 shadow-2xl bg-white rounded-xl w-48 z-150 border border-gray-100 mt-2">
+                <li class="menu-title text-gray-400 text-[10px] uppercase tracking-widest px-4 py-2 border-b border-gray-50 mb-1">
                   Gestión
                 </li>
-
                 @for (option of menuOptions(); track option.label) {
-                <li>
-                  <a [routerLink]="[option.link]" routerLinkActive="bg-blue-50 text-[#2B5797] font-semibold"
-                    [routerLinkActiveOptions]="{ exact: option.exact || false }"
-                    [class]="option.class || 'text-gray-700 hover:text-[#2B5797] hover:bg-blue-50'">
-                    <i class="{{ option.icon }} opacity-60"></i>
-                    {{ option.label }}
-                  </a>
-                </li>
+                  <li>
+                    <a
+                      [routerLink]="[option.link]"
+                      routerLinkActive="bg-blue-50 text-[#2B5797] font-semibold"
+                      [routerLinkActiveOptions]="{ exact: option.exact || false }"
+                      [class]="option.class || 'text-gray-700 hover:text-[#2B5797] hover:bg-blue-50'">
+                      <i class="{{ option.icon }} opacity-60"></i>
+                      {{ option.label }}
+                    </a>
+                  </li>
                 }
               </ul>
             </div>
           </td>
         </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+      }
+
+      @if (visualRows().length === 0) {
+        <tr>
+          <td [attr.colspan]="visibleColumns().length + 2" class="text-center text-gray-400 py-6">
+            Sin registros.
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <!-- Barra de paginación -->
+  @if (totalPages() > 1) {
+    <div #paginationBar>
+      <div class="flex items-center justify-between mt-4 px-6 py-2">
+        <div class="text-sm text-[#2B5797]">
+          Página <span class="text-[#2B5797] font-bold">{{ currentPage() }}</span>
+          de <span class="text-[#2B5797] font-bold">{{ totalPages() }}</span>
+          <span class="text-[#2B5797]"> — </span>
+          Total <span class="text-[#2B5797] font-bold">: {{ totalItems() }}</span>
+        </div>
+
+        <div class="flex items-center rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+          <button
+            class="btn btn-sm bg-white text-[#2B5797] hover:bg-blue-50 border-none rounded-none w-10"
+            [disabled]="currentPage() <= 1"
+            (click)="prev()">
+            ‹
+          </button>
+
+          @for (p of pagesWindow(); track p) {
+            @if (typeof p === 'number') {
+              <button
+                [ngClass]="p === currentPage()
+                  ? 'btn btn-sm text-white bg-[#2B5797] hover:bg-[#1e3e6d] border-none rounded-none w-10'
+                  : 'btn btn-sm bg-white text-[#2B5797] hover:bg-blue-50 border-none rounded-none w-10'"
+                (click)="goToPage(p)">
+                {{ p }}
+              </button>
+            } @else {
+              <button class="btn btn-sm bg-white text-[#2B5797] border-none rounded-none w-10" disabled>…</button>
+            }
+          }
+
+          <button
+            class="btn btn-sm bg-white text-[#2B5797] hover:bg-blue-50 border-none rounded-none w-10"
+            [disabled]="currentPage() >= totalPages()"
+            (click)="next()">
+            ›
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

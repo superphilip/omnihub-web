@@ -27,13 +27,17 @@
               type="text"
               [value]="search()"
               (input)="onSearchInput($event)"
+              (keydown.enter)="onSearchEnter()"
+              (blur)="onSearchBlur()"
+              (compositionstart)="onCompositionStart()"
+              (compositionend)="onCompositionEnd($event)"
               [placeholder]="searchPlaceholder()"
-              class="flex-1 bg-transparent outline-none" />
+              class="flex-1 bg-transparent outline-none"
+              aria-label="Buscar" />
           </label>
         </div>
       }
 
-      <!-- Slot de herramientas (aquí inyectamos ColumnsMenu desde el padre) -->
       <ng-content select="[header-tools]"></ng-content>
     </div>
   </div>

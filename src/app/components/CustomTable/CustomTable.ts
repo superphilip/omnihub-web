@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, input, output, signal, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AutoCellPipe } from '@core/pipes/AutoCell.pipe';
-import { CustomInput } from "@components/CustomInput/CustomInput";
-
 
 export type SortDir = 'asc' | 'desc';
 
@@ -24,10 +23,10 @@ export interface CustomTableMeta {
 interface TableAction {
   label: string;
   icon: string;
-  event?: 'delete' | 'details' | 'edit'; // Eventos para acciones manuales
-  link?: string;                         // Ruta para navegación
+  event?: 'delete' | 'details' | 'edit';
+  link?: string;
   class?: string;
-  exact?: boolean;                       // Para routerLinkActiveOptions
+  exact?: boolean;
 }
 
 export interface BaseEntity {
@@ -36,78 +35,37 @@ export interface BaseEntity {
 
 @Component({
   selector: 'custom-table',
-  imports: [AutoCellPipe, RouterLink, RouterLinkActive],
+  standalone: true,
+  imports: [CommonModule, AutoCellPipe, RouterLink, RouterLinkActive],
   templateUrl: './CustomTable.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomTable<T extends BaseEntity> {
+  // Outputs de acciones
   details = output<T>();
   edit = output<T>();
   delete = output<T>();
 
+  // Menú por fila (ejemplo)
   menuOptions = signal<TableAction[]>([
-    {
-      label: 'Editar',
-      icon: 'fa-solid fa-pen-to-square',
-      event: 'edit', // Esto es para que el componente sepa que es una acción manual
-      class: 'text-blue-500 font-bold hover:bg-blue-50',
-      link: '/edit', // Esto es para que el componente genere un routerLink
-      exact: true,
-
-    },
-    {
-      label: 'Detalles',
-      icon: 'fa-solid fa-circle-info',
-      event: 'details',
-      class: 'text-green-500 font-bold hover:bg-green-50',
-      link: '/details',
-      exact: true,
-    },
-    {
-      label: 'Eliminar',
-      icon: 'fa-solid fa-trash-can',
-      event: 'delete', // Este sigue siendo un evento (abre un modal de confirmación)
-      class: 'text-red-500 font-bold hover:bg-red-50',
-      link: '/delete',
-      exact: true,
-    }
+    { label: 'Editar', icon: 'fa-solid fa-pen-to-square', event: 'edit', class: 'text-blue-500 font-bold hover:bg-blue-50', link: '/edit', exact: true },
+    { label: 'Detalles', icon: 'fa-solid fa-circle-info', event: 'details', class: 'text-green-500 font-bold hover:bg-green-50', link: '/details', exact: true },
+    { label: 'Eliminar', icon: 'fa-solid fa-trash-can', event: 'delete', class: 'text-red-500 font-bold hover:bg-red-50', link: '/delete', exact: true },
   ]);
 
-
-
-  getRowId(row: T): string | number {
-    return row.id; // Funciona porque T ahora extiende de BaseEntity
-  }
-
-  handleAction(event: 'edit' | 'details' | 'delete' | undefined, row: any) {
-    if (!event) return; // Si es un link puro, no hace nada por evento
-
-    switch (event) {
-      case 'edit':
-        this.edit.emit(row);
-        break;
-      case 'details':
-        this.details.emit(row);
-        break;
-      case 'delete':
-        this.delete.emit(row);
-        break;
-    }
-  }
-
+  // Inputs
   rows = input<readonly T[]>([]);
   columns = input<readonly CustomTableColumn<T>[]>([]);
-  hiddenColumns = signal<Set<string>>(new Set());
   meta = input<CustomTableMeta | null>(null);
-  Label = input<string>('Titulo por defecto');
-  SubLabel = input<string>('Description por defecto');
 
+  // Estado
+  hiddenColumns = signal<Set<string>>(new Set());
   selectedRows = signal<Set<number>>(new Set<number>());
   selectAll = signal(false);
   sortKey = signal<keyof T | null>(null);
   sortDir = signal<SortDir>('asc');
-  page = signal(1);
 
+  // Derivados
   isAllSelected = computed(() =>
     this.rows().length > 0 && this.rows().every((_, i) => this.selectedRows().has(i))
   );
@@ -124,27 +82,73 @@ export class CustomTable<T extends BaseEntity> {
       arr.sort((a, b) => {
         const va = a[key];
         const vb = b[key];
-        if (typeof va === 'number' && typeof vb === 'number') {
-          return (va - vb) * direction;
-        } else if (typeof va === 'string' && typeof vb === 'string') {
-          return va.localeCompare(vb) * direction;
-        } else if (va instanceof Date && vb instanceof Date) {
-          return (va.getTime() - vb.getTime()) * direction;
-        }
+        if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * direction;
+        else if (typeof va === 'string' && typeof vb === 'string') return va.localeCompare(vb) * direction;
+        else if (va instanceof Date && vb instanceof Date) return (va.getTime() - vb.getTime()) * direction;
         return 0;
       });
     }
     return arr;
   });
-  create = output<void>();
+
+  // Paginación (derivados desde meta)
+  currentPage = computed(() => this.meta()?.page ?? 1);
+  totalPages = computed(() => this.meta()?.totalPages ?? 1);
+  totalItems = computed(() => this.meta()?.total ?? this.rows().length);
+
+  @ViewChild('paginationBar', { static: false }) paginationBar?: ElementRef<HTMLDivElement>;
+
+  constructor() {
+    // Solo resetea selección al cambiar de página (NO hace scroll automático)
+    effect(() => {
+      this.currentPage();
+      this.selectedRows.set(new Set());
+      this.selectAll.set(false);
+    });
+  }
+
+  private scrollPaginationIntoView() {
+    const el = this.paginationBar?.nativeElement;
+    const doScroll = () => {
+      if (el) {
+        el.scrollIntoView({ behavior: 'auto', block: 'end', inline: 'nearest' });
+      } else if (typeof window !== 'undefined') {
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'auto' });
+      }
+    };
+    if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(doScroll);
+    } else {
+      setTimeout(doScroll, 0);
+    }
+  }
+
+  pagesWindow = computed(() => {
+    const current = this.currentPage();
+    const total = this.totalPages();
+    const spread = 2;
+    const pages: (number | '…')[] = [];
+    if (total <= 1) return [1];
+
+    const add = (p: number) => { if (!pages.includes(p)) pages.push(p); };
+    const dot = () => { if (pages[pages.length - 1] !== '…') pages.push('…'); };
+
+    add(1);
+    if (current - spread > 2) dot();
+    for (let p = Math.max(2, current - spread); p <= Math.min(total - 1, current + spread); p++) add(p);
+    if (current + spread < total - 1) dot();
+    add(total);
+    return pages;
+  });
+
+  // Outputs tabla
   checkedChange = output<readonly T[]>();
   pageChange = output<number>();
   sortChange = output<{ key: keyof T & string; dir: SortDir }>();
 
+  // Selección
   toggleSelectAll(checked: boolean) {
-    const selection = checked
-      ? new Set<number>(this.rows().map((_, i) => i))
-      : new Set<number>();
+    const selection = checked ? new Set<number>(this.rows().map((_, i) => i)) : new Set<number>();
     this.selectedRows.set(selection);
     this.selectAll.set(checked);
     this.checkedChange.emit(this.rows().filter((_, i) => selection.has(i)));
@@ -158,6 +162,7 @@ export class CustomTable<T extends BaseEntity> {
     this.checkedChange.emit(this.rows().filter((_, i) => sel.has(i)));
   }
 
+  // Columnas visibles
   toggleColumn(key: string) {
     this.hiddenColumns.update(set => {
       const copy = new Set(set);
@@ -167,25 +172,33 @@ export class CustomTable<T extends BaseEntity> {
     });
   }
 
+  // Orden
   setSort(col: CustomTableColumn<T>) {
     if (!col.sortable) return;
-    if (this.sortKey() === col.key) {
-      this.sortDir.set(this.sortDir() === 'asc' ? 'desc' : 'asc');
-    } else {
-      this.sortKey.set(col.key);
-      this.sortDir.set('asc');
-    }
+    if (this.sortKey() === col.key) this.sortDir.set(this.sortDir() === 'asc' ? 'desc' : 'asc');
+    else { this.sortKey.set(col.key); this.sortDir.set('asc'); }
     this.sortChange.emit({ key: col.key, dir: this.sortDir() });
   }
 
-  goToPage(page: number) {
-    this.page.set(page);
-    this.pageChange.emit(page);
+  // Track por id seguro para el template
+  getRowId(row: T): string | number {
+    return row.id;
   }
 
+  // Paginación: SOLO hace scroll cuando el usuario usa paginación
+  goToPage(page: number) {
+    const total = this.totalPages();
+    const target = Math.min(Math.max(1, page), total);
+    if (target !== this.currentPage()) {
+      this.pageChange.emit(target);
+      this.scrollPaginationIntoView(); // scroll ONLY triggered on pagination
+    }
+  }
+  prev() { this.goToPage(this.currentPage() - 1); }
+  next() { this.goToPage(this.currentPage() + 1); }
+
+  // Celda
   getCellValue(row: T, col: CustomTableColumn<T>) {
     return col.render ? col.render(row) : row[col.key];
   }
 }
-
-
