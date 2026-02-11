@@ -1,0 +1,74 @@
+<div class="overflow-x-auto">
+  <table class="table w-full border-separate border-spacing-0">
+    <thead>
+      @for (hg of headerGroups(); track hg.id) {
+      <tr class="bg-gray-50/50">
+        @for (header of hg.headers; track header.id) {
+        @if (!header.isPlaceholder) {
+        <th (click)="toggleSort(header)" class="cursor-pointer select-none ...">
+          <div class="flex items-center gap-1">
+            {{ getHeaderText(header) | transloco }}
+            @if (header.column.getIsSorted() === 'asc') { <span class="text-[#2B5797]">▲</span> }
+            @else if (header.column.getIsSorted() === 'desc') { <span class="text-[#2B5797]">▼</span> }
+          </div>
+        </th>
+        } @else {
+        <th class="border-b border-gray-100 py-4 px-6"></th>
+        }
+        }
+        <th class="text-center text-[#2B5797] font-bold uppercase text-[11px] border-b border-gray-100">
+          {{ 'table.actions.shares' | transloco }}
+        </th>
+      </tr>
+      }
+    </thead>
+
+    <tbody>
+      @for (row of tableRows(); track row.id) {
+      <tr class="hover:bg-blue-50/30 transition-colors border-b border-gray-50">
+        @for (cell of row.getVisibleCells(); track cell.id) {
+        <td class="text-sm text-gray-600 py-4 px-6">
+          {{ cell.getValue() | autoCell: ($any(cell.column.id)) }}
+        </td>
+        }
+        <td class="text-left py-4 pr-6">
+          <custom-actions-menu [items]="getActions(row.original)" (action)="onRowAction($event, row.original)">
+          </custom-actions-menu>
+        </td>
+      </tr>
+      }
+
+      @if (tableRows().length === 0) {
+      <tr>
+        <td class="text-center text-gray-400 py-6" [attr.colspan]="(headerGroups()[0]?.headers?.length ?? 0) + 1">
+          Sin registros.
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+
+  <div class="flex items-center justify-between mt-4 px-6 py-2">
+    <div class="text-sm text-[#2B5797]">
+      Página <span class="text-[#2B5797] font-bold">{{ currentPageIndex() + 1 }}</span>
+      de <span class="text-[#2B5797] font-bold">{{ pageCount() }}</span>
+      — Total <span class="text-[#2B5797] font-bold">{{ totalRowCount() }}</span>
+    </div>
+
+    <div class="flex items-center rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+      <button class="btn btn-sm bg-white text-[#2B5797] hover:bg-blue-50 border-none rounded-none w-10"
+        [disabled]="!canPrev()" (click)="prev()">‹</button>
+
+      @for (p of pages(); track p) {
+      <button class="btn btn-sm" [ngClass]="(currentPageIndex() === p)
+                  ? 'text-white bg-[#2B5797] hover:bg-[#1e3e6d] border-none rounded-none w-10'
+                  : 'bg-white text-[#2B5797] hover:bg-blue-50 border-none rounded-none w-10'" (click)="goTo(p)">
+        {{ p + 1 }}
+      </button>
+      }
+
+      <button class="btn btn-sm bg-white text-[#2B5797] hover:bg-blue-50 border-none rounded-none w-10"
+        [disabled]="!canNext()" (click)="next()">›</button>
+    </div>
+  </div>
+</div>

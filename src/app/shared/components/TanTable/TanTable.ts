@@ -4,22 +4,25 @@ import {
   createTable,
   getCoreRowModel,
   getSortedRowModel,
-  getFilteredRowModel,
+  // getFilteredRowModel,
   type Table,
   type ColumnDef,
   type SortingState,
   type VisibilityState,
   type Updater,
+  Header,
 } from '@tanstack/angular-table';
-import { CustomActionsMenu, ActionItem } from '@components/CustomActionsMenu/CustomActionsMenu';
+
 import { AutoCellPipe } from '@core/pipes/AutoCell.pipe';
+import { TranslocoModule } from '@ngneat/transloco';
+import { ActionItem, CustomActionsMenu } from '../CustomActionsMenu/CustomActionsMenu';
 
 export interface BaseEntity { id: string | number; }
 
 @Component({
   selector: 'tan-table',
   standalone: true,
-  imports: [CommonModule, CustomActionsMenu, AutoCellPipe],
+  imports: [CommonModule, CustomActionsMenu, AutoCellPipe, TranslocoModule],
   templateUrl: './TanTable.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -57,6 +60,11 @@ export class TanTable<T extends BaseEntity> {
 
   currentPageIndex(): number { return this.pageIndex(); }
   totalRowCount(): number { return this.totalCountIn() ?? (this.tableSig()?.getRowCount() ?? 0); }
+
+  getHeaderText(header: Header<T, unknown>): string {
+    const def = header.column.columnDef.header;
+    return typeof def === 'string' ? def : header.column.id;
+  }
 
   constructor() {
     effect(() => {
@@ -105,7 +113,7 @@ export class TanTable<T extends BaseEntity> {
         enableSorting: true,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
+        // getFilteredRowModel: getFilteredRowModel(),
         renderFallbackValue: null,
       });
 
@@ -133,18 +141,18 @@ export class TanTable<T extends BaseEntity> {
   getActions(row: T): readonly ActionItem[] {
     const builder = this.rowActions();
     return builder ? builder(row) : [
-      { key: 'edit',    label: 'Editar',   icon: 'fa-solid fa-pen-to-square', colorClass: 'text-[#2B5797]' },
-      { key: 'details', label: 'Detalles', icon: 'fa-solid fa-circle-info',   colorClass: 'text-emerald-600' },
-      { key: 'delete',  label: 'Eliminar', icon: 'fa-solid fa-trash',         colorClass: 'text-red-600' },
+      { key: 'edit', label: 'Editar', icon: 'fa-solid fa-pen-to-square', colorClass: 'text-[#2B5797]' },
+      { key: 'details', label: 'Detalles', icon: 'fa-solid fa-circle-info', colorClass: 'text-emerald-600' },
+      { key: 'delete', label: 'Eliminar', icon: 'fa-solid fa-trash', colorClass: 'text-red-600' },
     ];
   }
 
   onRowAction(action: string, row: T) {
     switch (action) {
-      case 'edit':    this.edit.emit(row);    break;
+      case 'edit': this.edit.emit(row); break;
       case 'details': this.details.emit(row); break;
-      case 'delete':  this.delete.emit(row);  break;
-      default:        console.warn('Acción desconocida:', action);
+      case 'delete': this.delete.emit(row); break;
+      default: console.warn('Acción desconocida:', action);
     }
   }
 

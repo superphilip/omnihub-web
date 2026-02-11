@@ -3,12 +3,13 @@ import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angu
 import { Router } from '@angular/router';
 import { LoginRequest } from '../../interfaces/Login';
 import { LoginService } from '../../services/Login.service';
-import { normalizeBackendErrors } from 'src/app/utils/error.utils';
-import { handleNormalizedErrors } from 'src/app/utils/formError.utils';
-import { CustomInput } from "@components/CustomInput/CustomInput";
-import { CustomToast } from "@components/CustomToast/CustomToast";
-import { email, required } from 'src/app/utils/validation.utils';
+import { normalizeBackendErrors } from '@core/utils/error.utils';
+import { handleNormalizedErrors } from '@core/utils/formError.utils';
+
+import { email, required } from '@core/utils/validation.utils';
 import { ToastService } from '@core/services/Toast.service';
+import { CustomInput } from 'src/app/shared/components/CustomInput/CustomInput';
+import { CustomToast } from 'src/app/shared/components/CustomToast/CustomToast';
 
 @Component({
   selector: 'app-login',

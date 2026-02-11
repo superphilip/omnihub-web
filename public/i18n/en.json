@@ -1,0 +1,30 @@
+{
+  "roles": {
+    "header": {
+      "title": "Role Manager",
+      "subtitle": "Manage and view system roles"
+    },
+    "columns": {
+      "id": "Identifier",
+      "name": "Role Name",
+      "description": "Description",
+      "isSystemRole": "System Role?",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At"
+    },
+    "actions": {
+      "edit": "Edit",
+      "details": "Details",
+      "delete": "Delete"
+    }
+  },
+  "table": {
+    "actions": { "shares": "Actions" },
+    "pageSize": "Rows per page",
+    "showing": "Showing",
+    "of": "of"
+  },
+  "loading": { "roles": "Loading roles..." },
+  "errors": { "roles": { "load": "An error occurred while loading roles." } },
+  "actions": { "retry": "Retry" }
+}

@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { CustomInput } from "@components/CustomInput/CustomInput";
-import { generateRandomUsername } from 'src/app/utils/userName.utils';
+
+import { generateRandomUsername } from '@core/utils/userName.utils';
+import { CustomInput } from 'src/app/shared/components/CustomInput/CustomInput';
 
 
 @Component({

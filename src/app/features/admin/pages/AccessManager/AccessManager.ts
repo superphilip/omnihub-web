@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CustomTabs, TabItem } from '@components/CustomTabs/CustomTabs';
+
 // Reutilizamos tu página de Roles ya existente
 import Roles from '../Roles/Roles';
 import { AssignPermissions } from '../AssignPermissions/AssignPermissions';
 import { Permissions } from '../Permissions/Permissions';
+import { CustomTabs, TabItem } from 'src/app/shared/components/CustomTabs/CustomTabs';
 
 
 

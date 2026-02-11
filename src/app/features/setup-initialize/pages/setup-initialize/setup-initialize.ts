@@ -8,12 +8,13 @@ import { SetupHeader } from "../../components/SetupHeader/SetupHeader";
 
 import { SetupRol } from "../../components/SetupRol/SetupRol";
 import { SetupAdmin } from "../../components/SetupAdmin/SetupAdmin";
-import { email, minLength, required, minWords, onlyNumbers, validAddress, robustPassword,} from 'src/app/utils/validation.utils';
+import { email, minLength, required, minWords, onlyNumbers, validAddress, robustPassword,} from '@core/utils/validation.utils';
 import { SetupCompany } from '../../components/SetupHeader/SetupCompany/SetupCompany';
-import { normalizeBackendErrors } from 'src/app/utils/error.utils';
+import { normalizeBackendErrors } from '@core/utils/error.utils';
 import { Router } from '@angular/router';
-import { CustomToast } from "@components/CustomToast/CustomToast";
+
 import { ToastService } from '@core/services/Toast.service';
+import { CustomToast } from 'src/app/shared/components/CustomToast/CustomToast';
 
 @Component({
   selector: 'app-setup-initialize',

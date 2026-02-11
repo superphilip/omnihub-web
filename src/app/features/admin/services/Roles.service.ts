@@ -3,7 +3,7 @@ import { ApiService } from '@core/services/api.service';
 import { injectMutation } from '@tanstack/angular-query-experimental';
 import { QueryClient } from '@tanstack/query-core';
 import { lastValueFrom } from 'rxjs';
-import { RolesApiResponse } from '../interfaces/Roles';
+import { RolesApiResponse } from '../pages/Roles/interfaces/Roles';
 import { SortingState } from '@tanstack/angular-table';
 
 export type CreateRolePayload = {

@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
-import { CustomToast } from "@components/CustomToast/CustomToast";
+import { CustomToast } from './shared/components/CustomToast/CustomToast';
+
 
 
 @Component({

@@ -1,0 +1,30 @@
+{
+  "roles": {
+    "header": {
+      "title": "Gestor de Roles",
+      "subtitle": "Gestiona y visualiza los roles del sistema"
+    },
+    "columns": {
+      "id": "Identificador",
+      "name": "Nombre de Rol",
+      "description": "Descripción",
+      "isSystemRole": "¿Es del Sistema?",
+      "createdAt": "Creado el",
+      "updatedAt": "Actualizado el"
+    },
+    "actions": {
+      "edit": "Editar",
+      "details": "Detalles",
+      "delete": "Eliminar"
+    }
+  },
+  "table": {
+    "actions": { "shares": "Acciones" },
+    "pageSize": "Registros por página",
+    "showing": "Mostrando",
+    "of": "de"
+  },
+  "loading": { "roles": "Cargando roles..." },
+  "errors": { "roles": { "load": "Ocurrió un error cargando roles." } },
+  "actions": { "retry": "Reintentar" }
+}

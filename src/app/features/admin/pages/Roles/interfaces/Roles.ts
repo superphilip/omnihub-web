@@ -2,7 +2,8 @@ export type ColumnType = 'text' | 'date' | 'bool' | 'number';
 
 export interface ApiColumnSpec {
   key: string;
-  label: string;
+  label?: string;        // fallback textual (opcional)
+  labelKey?: string;     // clave i18n, p.ej. 'roles.columns.id'
   sortable?: boolean;
   visible?: boolean;
   type?: ColumnType;

@@ -10,7 +10,7 @@
   },
   "include": [
     "src/**/*.ts"
-  ],
+, "src/app/i18n/PublicTanslocoloader.ts"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]

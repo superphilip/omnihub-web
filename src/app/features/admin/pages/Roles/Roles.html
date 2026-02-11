@@ -1,13 +1,14 @@
 <div class="flex flex-col gap-4">
   <custom-header-table
-    [title]="'GESTOR DE ROLES'"
-    [subtitle]="'Gestiona y visualiza los roles del sistema'"
+    [title]="'roles.header.title' | transloco"
+    [subtitle]="'roles.header.subtitle' | transloco"
     [search]="search()"
     (searchChange)="onSearchChange($event)"
     (searchSubmit)="forceSearchNow()"
     (searchBlur)="forceSearchNow()">
     <div header-tools class="flex items-center gap-3">
-      <label class="text-xs text-gray-500">Registros por página</label>
+      <language-switcher></language-switcher>
+      <label class="text-xs text-gray-500">{{ 'table.pageSize' | transloco }}</label>
       <select class="select select-sm select-bordered"
               [value]="pageSize()"
               (change)="setPageSize($any($event.target).value)">
@@ -22,14 +23,16 @@
   @if (query.isError()) {
     <div class="flex items-center gap-2 text-red-600 px-6 py-4">
       <i class="fa-solid fa-triangle-exclamation"></i>
-      <span>Ocurrió un error cargando roles.</span>
+      <span>{{ 'errors.roles.load' | transloco }}</span>
       <code class="text-xs text-red-700 bg-red-50 px-2 py-1 rounded">{{ formatQueryError(query.error()) }}</code>
-      <button class="btn btn-sm ml-auto" (click)="query.refetch()">Reintentar</button>
+      <button class="btn btn-sm ml-auto" (click)="query.refetch()">
+        {{ 'actions.retry' | transloco }}
+      </button>
     </div>
   } @else if (query.isPending()) {
     <div class="flex items-center justify-center py-12 text-[#2B5797]">
       <i class="fa-solid fa-spinner animate-spin mr-2"></i>
-      <span>Cargando roles...</span>
+      <span>{{ 'loading.roles' | transloco }}</span>
     </div>
   } @else {
     <tan-table
@@ -49,11 +52,12 @@
 
     @if (meta()) {
       <div class="px-6 py-2 text-xs text-gray-500">
-        Mostrando
+        {{ 'table.showing' | transloco }}
         <span class="font-semibold text-[#2B5797]">{{ rangeStart() }}</span>
         –
         <span class="font-semibold text-[#2B5797]">{{ rangeEnd() }}</span>
-        de <span class="font-semibold text-[#2B5797]">{{ meta()?.total ?? 0 }}</span>
+        {{ 'table.of' | transloco }}
+        <span class="font-semibold text-[#2B5797]">{{ meta()?.total ?? 0 }}</span>
       </div>
     }
   }

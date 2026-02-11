@@ -1,20 +1,26 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { injectQuery } from '@tanstack/angular-query-experimental';
 import { ColumnDef } from '@tanstack/angular-table';
+// Imports necesarios
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs';
 
-import { CustomHeaderTable } from '@components/CustomHeaderTable/CustomHeaderTable';
-import { TanTable } from '@components/TanTable/TanTable';
-import type { ActionItem } from '@components/CustomActionsMenu/CustomActionsMenu';
 
 import { RolesService, RolesParams } from '../../services/Roles.service';
-import { Role } from '../../interfaces/Roles';
-import { mapApiColumnsToDefs, staticRoleColumns } from './ColumsFromBackend';
+import { Role } from './interfaces/Roles';
+import { mapApiColumnsToDefs, staticRoleColumns } from './utils/ColumsFromBackend';
+import { formatRoleName } from '@core/utils/role.utils';
+import { CustomHeaderTable } from 'src/app/shared/components/CustomHeaderTable/CustomHeaderTable';
+import { TanTable } from 'src/app/shared/components/TanTable/TanTable';
+import { ActionItem } from 'src/app/shared/components/CustomActionsMenu/CustomActionsMenu';
+import { LanguageSwitcherTs } from "src/app/shared/components/LanguageSwitcher.ts/LanguageSwitcher";
+import { TranslocoModule } from '@ngneat/transloco';
 
 
 @Component({
   selector: 'app-roles',
   standalone: true,
-  imports: [CustomHeaderTable, TanTable],
+  imports: [CustomHeaderTable, TanTable, LanguageSwitcherTs, TranslocoModule],
   templateUrl: './Roles.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -23,7 +29,7 @@ export default class Roles {
 
   // UI state
   readonly search = signal('');
-  readonly pageSize = signal(25);
+  readonly pageSize = signal(10);
   readonly pageIndex = signal(0);
 
   readonly sorting = signal<Array<{ id: string; desc: boolean }>>([]);
@@ -33,6 +39,14 @@ export default class Roles {
   readonly columns = signal<readonly ColumnDef<Role, any>[]>(staticRoleColumns);
   readonly pageCount = signal(1);
   readonly totalCount = signal(0);
+
+  private readonly search$ = toObservable(this.search).pipe(
+  map(v => v?.trim() ?? ''),
+  debounceTime(1000),
+  distinctUntilChanged()
+);
+readonly debouncedSearch = toSignal(this.search$, { initialValue: '' });
+readonly backendSearch = computed(() => formatRoleName(this.debouncedSearch()));
 
   // Meta para mostrar rango
   readonly meta = computed(() => this.query.data()?.meta ?? null);
@@ -59,7 +73,7 @@ export default class Roles {
     const params: RolesParams = {
       page: this.pageIndex() + 1,
       limit: this.pageSize(),
-      search: this.search(),
+      search: this.backendSearch(), // ← search con debounce
       includeColumns: true, // ← columnas dinámicas
       // sorting: this.sorting(),
     };
@@ -94,7 +108,7 @@ export default class Roles {
       const params: RolesParams = {
         page: response.meta.page,
         limit: response.meta.limit,
-        search: this.search(),
+        search: this.backendSearch(),
         includeColumns: true,
       };
       if (nextPage <= response.meta.totalPages) this.svc.prefetchRoles({ ...params, page: nextPage });
