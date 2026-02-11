@@ -3,14 +3,12 @@ import { provideRouter } from '@angular/router';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-experimental';
-import { provideTransloco, translocoConfig } from '@ngneat/transloco';
-
+import { TRANSLOCO_CONFIG, TRANSLOCO_LOADER, translocoConfig } from '@ngneat/transloco';
+import { PublicTranslocoLoader } from './i18n/PublicTranslocoLoader';
 
 import { routes } from './app.routes';
 import { AuthInterceptor } from '@core/interceptor/auth.interceptor';
 import { LanguageInterceptor } from '@core/interceptor/language.interceptor';
-import { PublicTranslocoLoader } from './i18n/PublicTranslocoLoader';
-
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,16 +23,17 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
 
-    // Transloco debe ir ANTES que HTTP/interceptores y debe ser la ÚNICA config de i18n
-    provideTransloco({
-      config: translocoConfig({
+    // Transloco con TOKENS (no uses provideTransloco simultáneamente)
+    {
+      provide: TRANSLOCO_CONFIG,
+      useValue: translocoConfig({
         availableLangs: ['es', 'en'],
         defaultLang: 'es',
         reRenderOnLangChange: true,
         prodMode: false,
       }),
-      loader: PublicTranslocoLoader, // clase Injectable
-    }),
+    },
+    { provide: TRANSLOCO_LOADER, useClass: PublicTranslocoLoader },
 
     provideHttpClient(withFetch(), withInterceptors([LanguageInterceptor, AuthInterceptor])),
     provideTanStackQuery(queryClient),

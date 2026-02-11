@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { TranslocoService } from '@ngneat/transloco';
 
 const LANG_STORE_KEY = 'lang' as const;
@@ -6,7 +6,7 @@ type Lang = 'es' | 'en';
 
 @Injectable({ providedIn: 'root' })
 export class I18nService {
-  private transloco = inject(TranslocoService);
+  constructor(private transloco: TranslocoService) {}
 
   get current(): string { return this.transloco.getActiveLang(); }
 
