@@ -11,6 +11,7 @@ import { AuthInterceptor } from '@core/interceptor/auth.interceptor';
 import { LanguageInterceptor } from '@core/interceptor/language.interceptor';
 import { PublicTranslocoLoader } from './i18n/PublicTanslocoloader';
 
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: { staleTime: 30_000, gcTime: 5 * 60_000, retry: 1, refetchOnWindowFocus: false },
