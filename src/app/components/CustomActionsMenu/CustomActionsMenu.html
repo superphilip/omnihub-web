@@ -1,0 +1,45 @@
+<!-- Botón origen: usa pointerdown para abrir/cerrar sin “doble” efecto -->
+<button
+  #originBtn
+  type="button"
+  class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white text-[#2B5797] shadow hover:shadow-md border border-gray-200
+         focus:outline-none focus:ring-2 focus:ring-[#2B5797]/30"
+  (pointerdown)="onTogglePointerDown($event)">
+  <i class="fa-solid fa-ellipsis-vertical"></i>
+  <span class="font-semibold">Options</span>
+</button>
+
+<!-- Panel fijo (por encima del scroll). Oculto hasta estar posicionado -->
+@if (open()) {
+  <div
+    #panelEl
+    class="fixed z-1000 w-64 rounded-2xl bg-white shadow-2xl border border-gray-100 overflow-hidden transition-opacity duration-75"
+    [style.top.px]="panelTop()"
+    [style.left.px]="panelLeft()"
+    [style.opacity]="ready() ? 1 : 0"
+    [style.pointer-events]="ready() ? 'auto' : 'none'"
+    (click)="$event.stopPropagation()">
+    <div class="px-4 py-3 text-[11px] font-black text-gray-400 uppercase tracking-widest">
+      Gestión
+    </div>
+    <div class="h-px bg-gray-100"></div>
+
+    <ul class="py-1">
+      @for (it of items(); track it.key) {
+        <li>
+          <button
+            type="button"
+            class="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 text-left"
+            (click)="select(it.key)">
+            @if (it.icon) {
+              <i class="{{ it.icon }} {{ it.colorClass ?? 'text-[#2B5797]' }}"></i>
+            }
+            <span class="font-semibold {{ it.colorClass ?? 'text-[#2B5797]' }}">
+              {{ it.label }}
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+  </div>
+}

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, input
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AutoCellPipe } from '@core/pipes/AutoCell.pipe';
+import { ActionItem, CustomActionsMenu } from '@components/CustomActionsMenu/CustomActionsMenu';
 
 export type SortDir = 'asc' | 'desc';
 
@@ -36,7 +37,7 @@ export interface BaseEntity {
 @Component({
   selector: 'custom-table',
   standalone: true,
-  imports: [CommonModule, AutoCellPipe, RouterLink, RouterLinkActive],
+  imports: [CommonModule, AutoCellPipe, CustomActionsMenu],
   templateUrl: './CustomTable.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -45,13 +46,6 @@ export class CustomTable<T extends BaseEntity> {
   details = output<T>();
   edit = output<T>();
   delete = output<T>();
-
-  // Menú por fila (ejemplo)
-  menuOptions = signal<TableAction[]>([
-    { label: 'Editar', icon: 'fa-solid fa-pen-to-square', event: 'edit', class: 'text-blue-500 font-bold hover:bg-blue-50', link: '/edit', exact: true },
-    { label: 'Detalles', icon: 'fa-solid fa-circle-info', event: 'details', class: 'text-green-500 font-bold hover:bg-green-50', link: '/details', exact: true },
-    { label: 'Eliminar', icon: 'fa-solid fa-trash-can', event: 'delete', class: 'text-red-500 font-bold hover:bg-red-50', link: '/delete', exact: true },
-  ]);
 
   // Inputs
   rows = input<readonly T[]>([]);
@@ -201,4 +195,27 @@ export class CustomTable<T extends BaseEntity> {
   getCellValue(row: T, col: CustomTableColumn<T>) {
     return col.render ? col.render(row) : row[col.key];
   }
+  rowActions = input<(row: T) => readonly ActionItem[]>();
+  private defaultRowActions(): readonly ActionItem[] {
+    return [
+      { key: 'edit',    label: 'Editar',   icon: 'fa-solid fa-pen-to-square', colorClass: 'text-[#2B5797]' },
+      { key: 'details', label: 'Detalles', icon: 'fa-solid fa-circle-info',   colorClass: 'text-emerald-600' },
+      { key: 'delete',  label: 'Eliminar', icon: 'fa-solid fa-trash',         colorClass: 'text-red-600' },
+    ];
+  }
+
+  getRowActions(row: T): readonly ActionItem[] {
+    const builder = this.rowActions();
+    return builder ? builder(row) : this.defaultRowActions();
+  }
+
+  onRowAction(action: string, row: T) {
+    switch (action) {
+      case 'edit':    this.edit.emit(row);    break;
+      case 'details': this.details.emit(row); break;
+      case 'delete':  this.delete.emit(row);  break;
+      default:        console.warn('Acción desconocida:', action);
+    }
+  }
 }
+

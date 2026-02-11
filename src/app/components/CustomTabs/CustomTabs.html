@@ -1,0 +1,17 @@
+<div class="w-full">
+  <div role="tablist" class="flex gap-2 border-b border-gray-200">
+    @for (tab of tabs(); track tab.key; let i = $index) {
+      <button
+        role="tab"
+        class="px-4 py-2 rounded-t-xl font-semibold transition-colors
+               hover:bg-gray-50 focus:outline-none
+               [data-active]:(bg-white text-[#2B5797] border-b-2 border-b-[#2B5797])
+               data-[active=false]:(text-gray-500)"
+        [attr.data-active]="active() === tab.key"
+        (click)="setActive(tab.key, i)">
+        @if (tab.icon) { <i class="{{tab.icon}} mr-2"></i> }
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+</div>

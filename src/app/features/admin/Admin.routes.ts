@@ -11,14 +11,8 @@ export const adminMenuRoutes: Routes = [
   {
     path: 'rutas',
     title: 'Gestión de Accesos',
-    data: { icon: 'fa-solid fa-route' },
-    loadComponent: () => import('./pages/Rutas/Rutas')
-  },
-  {
-    path: 'roles',
-    title: 'Gestión de Roles',
-    data: { icon: 'fa-solid fa-users-gear' },
-    loadComponent: () => import('./pages/Roles/Roles')
+    data: { icon: 'fa-solid fa-key' },
+    loadComponent: () => import('./pages/AccessManager/AccessManager')
   },
   {
     title: 'PARAMETROS',
