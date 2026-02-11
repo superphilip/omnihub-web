@@ -7,6 +7,20 @@ import { provideHttpClient, withFetch, withInterceptors, withInterceptorsFromDi 
 import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-experimental';
 import { AuthInterceptor } from '@core/interceptor/auth.interceptor';
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // evita flicker y revalidaciones muy agresivas
+      staleTime: 30_000,    // 30s
+      gcTime: 5 * 60_000,   // 5 min
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: 0,
+    },
+  },
+});
 
 
 export const appConfig: ApplicationConfig = {
@@ -18,6 +32,6 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([AuthInterceptor])
     ),
 
-    provideTanStackQuery(new QueryClient())
+    provideTanStackQuery(queryClient)
   ]
 };

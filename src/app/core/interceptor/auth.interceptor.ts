@@ -1,52 +1,63 @@
-// auth.interceptor.ts
-import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse, HttpClient } from '@angular/common/http';
+import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthTokenService } from '@core/services/AuthToken.service';
-
+import { ApiService } from '@core/services/api.service';
 import { catchError, filter, switchMap, take, throwError, tap } from 'rxjs';
+
+function isAuthUrl(url: string): boolean {
+  const u = url.toLowerCase();
+  return u.includes('/auth/login') || u.includes('/auth/refresh') || u.includes('/auth/signup');
+}
 
 export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenService = inject(AuthTokenService);
-  const http = inject(HttpClient);
+  const api = inject(ApiService);
+
+  // Excluir rutas de auth del flujo de autorización/refresh
+  if (isAuthUrl(req.url)) {
+    return next(req);
+  }
 
   const accessToken = tokenService.getToken();
 
-  // 1. Verificación previa al envío
+  // Intentar refresh solo si el access token está vencido
   if (accessToken && tokenService.isTokenExpired(accessToken)) {
-    return handleRefresh(req, next, tokenService, http);
+    return handleRefresh(req, next, tokenService, api);
   }
 
-  // 2. Clonar petición con token si existe
   const authReq = accessToken
     ? req.clone({ setHeaders: { Authorization: accessToken } })
     : req;
 
-  // 3. Manejo de respuesta y errores (401)
   return next(authReq).pipe(
     catchError((error) => {
-      if (error instanceof HttpErrorResponse && error.status === 401) {
-        return handleRefresh(authReq, next, tokenService, http);
+      if (error instanceof HttpErrorResponse && error.status === 401 && !isAuthUrl(req.url)) {
+        return handleRefresh(authReq, next, tokenService, api);
       }
       return throwError(() => error);
     })
   );
 };
 
-/**
- * Función auxiliar para gestionar la renovación del token
- */
-function handleRefresh(req: HttpRequest<unknown>, next: HttpHandlerFn, tokenService: AuthTokenService, http: HttpClient) {
+function handleRefresh(
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn,
+  tokenService: AuthTokenService,
+  api: ApiService
+) {
   if (!tokenService.isRefreshing) {
     tokenService.isRefreshing = true;
     tokenService.refreshTokenSubject.next(null);
 
     const refreshToken = tokenService.getRefreshToken();
-    if (!refreshToken) {
+    if (!refreshToken || tokenService.isTokenExpired(refreshToken)) {
+      tokenService.isRefreshing = false;
       tokenService.logout();
-      return throwError(() => new Error('Sin refresh token disponible'));
+      return throwError(() => new Error('Refresh token inválido o vencido'));
     }
 
-    return http.post<{ accessToken: string; refreshToken: string }>('/api/auth/refresh', { refreshToken }).pipe(
+    // Usa ApiService → environment.apiUrl ya incluye /api
+    return api.post<{ accessToken: string; refreshToken: string }>('auth/refresh', { refreshToken }).pipe(
       tap(tokens => {
         tokenService.isRefreshing = false;
         tokenService.setToken(tokens.accessToken);
@@ -61,7 +72,6 @@ function handleRefresh(req: HttpRequest<unknown>, next: HttpHandlerFn, tokenServ
       })
     );
   } else {
-    // Si ya se está refrescando, esperamos al nuevo token
     return tokenService.refreshTokenSubject.pipe(
       filter(token => !!token),
       take(1),

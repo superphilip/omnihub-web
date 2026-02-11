@@ -1,22 +1,30 @@
+export type ColumnType = 'text' | 'date' | 'bool' | 'number';
+
+export interface ApiColumnSpec {
+  key: string;
+  label: string;
+  sortable?: boolean;
+  visible?: boolean;
+  type?: ColumnType;
+  format?: string;
+}
+
 export interface Role {
-  id: string;
+  id: string | number;
   name: string;
   description?: string;
   isSystemRole: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-
-export interface RolesApiMeta {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface RolesApiResponse {
-  success: boolean;
   data: Role[];
-  meta: RolesApiMeta;
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+  columns?: ApiColumnSpec[]; // opcional: cuando el backend envía include=columns
 }

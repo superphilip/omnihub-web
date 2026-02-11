@@ -9,7 +9,7 @@ export const adminMenuRoutes: Routes = [
     loadComponent: () => import('./pages/Users/Users')
   },
   {
-    path: 'rutas',
+    path: 'accesos',
     title: 'Gestión de Accesos',
     data: { icon: 'fa-solid fa-key' },
     loadComponent: () => import('./pages/AccessManager/AccessManager')

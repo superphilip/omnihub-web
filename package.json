@@ -37,6 +37,7 @@
     "@tailwindcss/cli": "^4.1.18",
     "@tanstack/angular-query-experimental": "^5.90.25",
     "@tanstack/angular-table": "^8.21.3",
+    "@tanstack/table-core": "^8.21.3",
     "daisyui": "^5.5.17",
     "express": "^5.1.0",
     "ngx-toastr": "^20.0.5",

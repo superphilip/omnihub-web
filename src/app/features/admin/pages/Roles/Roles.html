@@ -1,48 +1,60 @@
-@if (loading) {
-<custom-loading message="Cargando roles..."></custom-loading>
-} @else {
 <div class="flex flex-col gap-4">
-
-  <custom-header-table [title]="'GESTOR DE ROLES'" [subtitle]="'Gestiona y visualiza los roles del sistema'"
-    [search]="searchHuman()" (requestOpen)="openAdd()" (searchChange)="onSearchChange($event)"
-    (searchSubmit)="forceSearchNow()" (searchBlur)="forceSearchNow()"> <!-- Blur: dispara inmediato -->
-
-    <div header-tools>
-      <custom-columns-visible [columns]="allColumns()" [hidden]="hiddenColumns()" (toggle)="toggleColumn($event)"
-        (showAll)="showAllColumns()" (hideAll)="hideAllColumns()">
-      </custom-columns-visible>
+  <custom-header-table
+    [title]="'GESTOR DE ROLES'"
+    [subtitle]="'Gestiona y visualiza los roles del sistema'"
+    [search]="search()"
+    (searchChange)="onSearchChange($event)"
+    (searchSubmit)="forceSearchNow()"
+    (searchBlur)="forceSearchNow()">
+    <div header-tools class="flex items-center gap-3">
+      <label class="text-xs text-gray-500">Registros por página</label>
+      <select class="select select-sm select-bordered"
+              [value]="pageSize()"
+              (change)="setPageSize($any($event.target).value)">
+        <option [value]="10">10</option>
+        <option [value]="25">25</option>
+        <option [value]="50">50</option>
+        <option [value]="100">100</option>
+      </select>
     </div>
   </custom-header-table>
 
-  <div class="w-full overflow-x-auto border border-gray-100 rounded-xl bg-white shadow-sm">
-    <custom-table [rows]="rows" [columns]="columns()" [meta]="meta" (pageChange)="setPage($event)"
-      (sortChange)="onSort($event)">
-    </custom-table>
-
-    @if (meta) {
-    <div class="px-6 py-2 text-xs text-gray-500">
-      Mostrando
-      <span class="font-semibold text-[#2B5797]">{{ rangeStart }}</span>–<span class="font-semibold text-[#2B5797]">{{
-        rangeEnd }}</span>
-      de <span class="font-semibold text-[#2B5797]">{{ meta.total }}</span>
+  @if (query.isError()) {
+    <div class="flex items-center gap-2 text-red-600 px-6 py-4">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>Ocurrió un error cargando roles.</span>
+      <code class="text-xs text-red-700 bg-red-50 px-2 py-1 rounded">{{ formatQueryError(query.error()) }}</code>
+      <button class="btn btn-sm ml-auto" (click)="query.refetch()">Reintentar</button>
     </div>
+  } @else if (query.isPending()) {
+    <div class="flex items-center justify-center py-12 text-[#2B5797]">
+      <i class="fa-solid fa-spinner animate-spin mr-2"></i>
+      <span>Cargando roles...</span>
+    </div>
+  } @else {
+    <tan-table
+      [data]="rows()"
+      [columns]="columns()"
+      [pageSize]="pageSize()"
+      [globalFilter]="search()"
+      [totalPagesIn]="pageCount()"
+      [totalCountIn]="totalCount()"
+      (pageChange)="setPage($event)"
+      (sortingChange)="onSortingChange($event)"
+      [rowActions]="rowMenuItems"
+      (edit)="onEdit($event)"
+      (details)="onDetails($event)"
+      (delete)="onDelete($event)">
+    </tan-table>
+
+    @if (meta()) {
+      <div class="px-6 py-2 text-xs text-gray-500">
+        Mostrando
+        <span class="font-semibold text-[#2B5797]">{{ rangeStart() }}</span>
+        –
+        <span class="font-semibold text-[#2B5797]">{{ rangeEnd() }}</span>
+        de <span class="font-semibold text-[#2B5797]">{{ meta()?.total ?? 0 }}</span>
+      </div>
     }
-  </div>
+  }
 </div>
-
-@if (fetching && rows.length === 0) {
-<div class="text-center py-20 text-gray-400">
-  <i class="fa-solid fa-folder-open text-3xl mb-2"></i>
-  <p>No hay roles para mostrar.</p>
-</div>
-}
-}
-
-<custom-modal [open]="adding()" [title]="'Nuevo rol'" (close)="closeAdd()">
-  <div modal-body>
-    <role-form [formGroup]="form" [pending]="createMutation.isPending()" (submitForm)="submitRole($event)"
-      (cancel)="closeAdd()">
-    </role-form>
-  </div>
-  <div modal-footer></div>
-</custom-modal>
