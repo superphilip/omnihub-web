@@ -8,7 +8,7 @@ export class PublicTranslocoLoader implements TranslocoLoader {
 
   getTranslation(lang: string) {
     const base = (import.meta as any)?.env?.BASE_URL ?? '/';
-    // Usa HttpClient para integrarse con Angular (zona, estabilización, interceptores)
+    // TranslocoLoader debe devolver Observable
     return this.http.get<Record<string, any>>(`${base}i18n/${lang}.json`);
   }
 }

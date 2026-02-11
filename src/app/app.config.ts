@@ -23,7 +23,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
 
-    // Transloco con TOKENS (no uses provideTransloco simultáneamente)
+    // Config Transloco con TOKENS
     {
       provide: TRANSLOCO_CONFIG,
       useValue: translocoConfig({
@@ -35,7 +35,9 @@ export const appConfig: ApplicationConfig = {
     },
     { provide: TRANSLOCO_LOADER, useClass: PublicTranslocoLoader },
 
+    // HTTP + interceptores después
     provideHttpClient(withFetch(), withInterceptors([LanguageInterceptor, AuthInterceptor])),
+
     provideTanStackQuery(queryClient),
   ],
 };
