@@ -10,7 +10,7 @@
   },
   "include": [
     "src/**/*.ts"
-, "src/app/i18n/PublicTanslocoLoader.ts"  ],
+, "src/app/i18n/PublicTranslocoLoader.ts"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]
