@@ -9,7 +9,7 @@ import { provideTransloco, translocoConfig } from '@ngneat/transloco';
 import { routes } from './app.routes';
 import { AuthInterceptor } from '@core/interceptor/auth.interceptor';
 import { LanguageInterceptor } from '@core/interceptor/language.interceptor';
-import { PublicTranslocoLoader } from './i18n/PublicTanslocoloader';
+import { PublicTranslocoLoader } from './i18n/PublicTanslocoLoader';
 
 
 const queryClient = new QueryClient({
