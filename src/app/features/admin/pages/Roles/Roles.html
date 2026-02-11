@@ -1,38 +1,29 @@
 <div class="flex flex-col gap-4">
   <custom-header-table
-    [title]="'roles.header.title' | transloco"
-    [subtitle]="'roles.header.subtitle' | transloco"
+    [title]="'roles.header.title' | translate"
+    [subtitle]="'roles.header.subtitle' | translate"
     [search]="search()"
     (searchChange)="onSearchChange($event)"
     (searchSubmit)="forceSearchNow()"
     (searchBlur)="forceSearchNow()">
     <div header-tools class="flex items-center gap-3">
-      <language-switcher></language-switcher>
-      <label class="text-xs text-gray-500">{{ 'table.pageSize' | transloco }}</label>
-      <select class="select select-sm select-bordered"
-              [value]="pageSize()"
-              (change)="setPageSize($any($event.target).value)">
-        <option [value]="10">10</option>
-        <option [value]="25">25</option>
-        <option [value]="50">50</option>
-        <option [value]="100">100</option>
-      </select>
+
     </div>
   </custom-header-table>
 
   @if (query.isError()) {
     <div class="flex items-center gap-2 text-red-600 px-6 py-4">
       <i class="fa-solid fa-triangle-exclamation"></i>
-      <span>{{ 'errors.roles.load' | transloco }}</span>
+      <span>{{ 'errors.roles.load' | translate }}</span>
       <code class="text-xs text-red-700 bg-red-50 px-2 py-1 rounded">{{ formatQueryError(query.error()) }}</code>
       <button class="btn btn-sm ml-auto" (click)="query.refetch()">
-        {{ 'actions.retry' | transloco }}
+        {{ 'actions.retry' | translate }}
       </button>
     </div>
   } @else if (query.isPending()) {
     <div class="flex items-center justify-center py-12 text-[#2B5797]">
       <i class="fa-solid fa-spinner animate-spin mr-2"></i>
-      <span>{{ 'loading.roles' | transloco }}</span>
+      <span>{{ 'loading.roles' | translate }}</span>
     </div>
   } @else {
     <tan-table
@@ -52,11 +43,11 @@
 
     @if (meta()) {
       <div class="px-6 py-2 text-xs text-gray-500">
-        {{ 'table.showing' | transloco }}
+        {{ 'table.showing' | translate }}
         <span class="font-semibold text-[#2B5797]">{{ rangeStart() }}</span>
         –
         <span class="font-semibold text-[#2B5797]">{{ rangeEnd() }}</span>
-        {{ 'table.of' | transloco }}
+        {{ 'table.of' | translate }}
         <span class="font-semibold text-[#2B5797]">{{ meta()?.total ?? 0 }}</span>
       </div>
     }

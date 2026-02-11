@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   createTable,
   getCoreRowModel,
   getSortedRowModel,
-  // getFilteredRowModel,
   type Table,
   type ColumnDef,
   type SortingState,
@@ -14,7 +13,7 @@ import {
 } from '@tanstack/angular-table';
 
 import { AutoCellPipe } from '@core/pipes/AutoCell.pipe';
-import { TranslocoModule } from '@ngneat/transloco';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ActionItem, CustomActionsMenu } from '../CustomActionsMenu/CustomActionsMenu';
 
 export interface BaseEntity { id: string | number; }
@@ -22,11 +21,14 @@ export interface BaseEntity { id: string | number; }
 @Component({
   selector: 'tan-table',
   standalone: true,
-  imports: [CommonModule, CustomActionsMenu, AutoCellPipe, TranslocoModule],
+  imports: [CommonModule, CustomActionsMenu, AutoCellPipe, TranslateModule],
   templateUrl: './TanTable.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TanTable<T extends BaseEntity> {
+  // Inyección del servicio de traducción
+  private readonly translate = inject(TranslateService);
+
   data = input<readonly T[]>([]);
   columns = input<readonly ColumnDef<T, any>[]>([]);
   pageSize = input<number>(10);
@@ -113,8 +115,10 @@ export class TanTable<T extends BaseEntity> {
         enableSorting: true,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        // getFilteredRowModel: getFilteredRowModel(),
         renderFallbackValue: null,
+
+        // Pasa TranslateService a los renderizadores de celda vía meta
+        meta: { translate: this.translate },
       });
 
       this.tableSig.set(inst);

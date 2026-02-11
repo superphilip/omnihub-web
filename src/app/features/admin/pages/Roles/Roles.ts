@@ -13,14 +13,13 @@ import { formatRoleName } from '@core/utils/role.utils';
 import { CustomHeaderTable } from 'src/app/shared/components/CustomHeaderTable/CustomHeaderTable';
 import { TanTable } from 'src/app/shared/components/TanTable/TanTable';
 import { ActionItem } from 'src/app/shared/components/CustomActionsMenu/CustomActionsMenu';
-import { LanguageSwitcherTs } from "src/app/shared/components/LanguageSwitcher.ts/LanguageSwitcher";
-import { TranslocoModule } from '@ngneat/transloco';
+import { TranslateModule } from '@ngx-translate/core';
 
 
 @Component({
   selector: 'app-roles',
   standalone: true,
-  imports: [CustomHeaderTable, TanTable, LanguageSwitcherTs, TranslocoModule],
+  imports: [CustomHeaderTable, TanTable, TranslateModule],
   templateUrl: './Roles.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

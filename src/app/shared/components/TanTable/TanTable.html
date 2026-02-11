@@ -7,7 +7,7 @@
         @if (!header.isPlaceholder) {
         <th (click)="toggleSort(header)" class="cursor-pointer select-none ...">
           <div class="flex items-center gap-1">
-            {{ getHeaderText(header) | transloco }}
+            {{ getHeaderText(header) | translate }}
             @if (header.column.getIsSorted() === 'asc') { <span class="text-[#2B5797]">▲</span> }
             @else if (header.column.getIsSorted() === 'desc') { <span class="text-[#2B5797]">▼</span> }
           </div>
@@ -17,7 +17,7 @@
         }
         }
         <th class="text-center text-[#2B5797] font-bold uppercase text-[11px] border-b border-gray-100">
-          {{ 'table.actions.shares' | transloco }}
+          {{ 'table.actions.shares' | translate }}
         </th>
       </tr>
       }

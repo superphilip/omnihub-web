@@ -1,8 +1,11 @@
 <nav class="w-full bg-transparent px-0 py-2">
-  <div class="flex items-center justify-between w-full">
+  <div class="flex items-center gap-4 w-full">
 
+    <!-- Izquierda: selector de tema (ejemplo) -->
     <div class="flex-none w-64">
-      <select class="w-full h-10 px-3 bg-white border border-gray-300 rounded-lg focus:outline-none appearance-none cursor-pointer">
+      <select
+        class="w-full h-10 px-3 bg-white border border-gray-300 rounded-lg focus:outline-none appearance-none cursor-pointer"
+        aria-label="Tema de la interfaz">
         <option value=""></option>
         <option>Crimson</option>
         <option>Amber</option>
@@ -10,13 +13,21 @@
       </select>
     </div>
 
-    <div
-      (click)="onMenuClick.emit()"
-      class="relative z-60 flex items-center justify-center w-15 h-15 rounded-lg cursor-pointer transition-all hover:bg-gray-100 active:bg-gray-200 group"
-    >
-      <span class="absolute inset-0 z-20 bg-transparent"></span>
+    <!-- Centro: puedes añadir más acciones si necesitas -->
+    <div class="flex items-center gap-3">
+      <!-- otras acciones opcionales -->
+    </div>
 
-      <i class="fa-solid fa-bars text-2xl text-gray-600 pointer-events-none z-10"></i>
+    <!-- Derecha: selector de idioma y botón de menú -->
+    <div class="flex items-center gap-3 ml-auto">
+      <language-switcher></language-switcher>
+
+      <div (click)="onMenuClick.emit()"
+        class="relative z-60 flex items-center justify-center w-15 h-15 rounded-lg cursor-pointer transition-all hover:bg-gray-100 active:bg-gray-200 group">
+        <span class="absolute inset-0 z-20 bg-transparent"></span>
+
+        <i class="fa-solid fa-bars text-2xl text-gray-600 pointer-events-none z-10"></i>
+      </div>
     </div>
 
   </div>

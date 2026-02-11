@@ -1,9 +1,11 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { inject, Pipe, PipeTransform } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 
 @Pipe({
   name: 'autoCell'
 })
 export class AutoCellPipe implements PipeTransform {
+  private t = inject(TranslateService);
   transform(value: any, key?: string): any {
     // Badge para boolean
     if (typeof value === 'boolean') {
@@ -52,7 +54,12 @@ export class AutoCellPipe implements PipeTransform {
       }
     }
 
+    if (typeof value === 'string' && /^[a-z]+(\.[a-z0-9_-]+)+$/i.test(value)) {
+      return this.t.instant(value); // traduce claves tipo 'roles.status.active'
+    }
+
     // Resto: valor tal cual
     return value;
   }
+
 }
