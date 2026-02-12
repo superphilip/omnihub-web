@@ -25,6 +25,9 @@ import { mapApiColumnsToDefs, staticRoleColumns } from './ColumsFromBackend';
 export default class Roles {
   private readonly svc = inject(RolesService);
 
+  readonly rowHeight = 48;
+  readonly minHeight = computed(() => this.pageSize() * this.rowHeight + 60);
+
   // UI state
   readonly search = signal('');
   private readonly search$ = toObservable(this.search).pipe(
