@@ -1,53 +1,87 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { injectQuery } from '@tanstack/angular-query-experimental';
 import { ColumnDef } from '@tanstack/angular-table';
-// Imports necesarios
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs';
-
-
-import { RolesService, RolesParams } from '../../services/Roles.service';
-import { Role } from './interfaces/Roles';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Role, RolesApiResponse } from './interfaces/Roles';
 import { mapApiColumnsToDefs, staticRoleColumns } from './utils/ColumsFromBackend';
 import { formatRoleName } from '@core/utils/role.utils';
 import { CustomHeaderTable } from 'src/app/shared/components/CustomHeaderTable/CustomHeaderTable';
 import { TanTable } from 'src/app/shared/components/TanTable/TanTable';
 import { ActionItem } from 'src/app/shared/components/CustomActionsMenu/CustomActionsMenu';
 import { TranslateModule } from '@ngx-translate/core';
+import { RolesParams, RolesService } from './services/Roles.service';
+import { CustomModal } from 'src/app/shared/components/CustomModal/CustomModal';
 
+import { ToastService } from '@core/services/Toast.service';
+import { RoleForm } from './components/RoleForm/RoleForm';
 
 @Component({
   selector: 'app-roles',
   standalone: true,
-  imports: [CustomHeaderTable, TanTable, TranslateModule],
+  imports: [
+    CustomHeaderTable,
+    TanTable,
+    TranslateModule,
+    ReactiveFormsModule,
+    CustomModal,
+    RoleForm
+  ],
   templateUrl: './Roles.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Roles {
   private readonly svc = inject(RolesService);
+  private readonly toast = inject(ToastService);
+  private readonly fb = inject(FormBuilder);
 
-  // UI state
+  // === UI state ===
   readonly search = signal('');
   readonly pageSize = signal(10);
   readonly pageIndex = signal(0);
-
   readonly sorting = signal<Array<{ id: string; desc: boolean }>>([]);
 
-  // Data
   readonly rows = signal<readonly Role[]>([]);
   readonly columns = signal<readonly ColumnDef<Role, any>[]>(staticRoleColumns);
   readonly pageCount = signal(1);
   readonly totalCount = signal(0);
+  readonly showForm = signal(false); // Visibilidad del modal
+  readonly formPending = signal(false);
 
+  // === Formulario para crear rol ===
+  roleForm = this.fb.group({
+    name: ['', Validators.required],
+    description: [''],
+    isSystemRole: [false]
+  });
+
+  // === Buscador (debounce) ===
   private readonly search$ = toObservable(this.search).pipe(
-  map(v => v?.trim() ?? ''),
-  debounceTime(1000),
-  distinctUntilChanged()
-);
-readonly debouncedSearch = toSignal(this.search$, { initialValue: '' });
-readonly backendSearch = computed(() => formatRoleName(this.debouncedSearch()));
+    map(v => v?.trim() ?? ''),
+    debounceTime(1000),
+    distinctUntilChanged()
+  );
+  readonly debouncedSearch = toSignal(this.search$, { initialValue: '' });
+  readonly backendSearch = computed(() => formatRoleName(this.debouncedSearch()));
 
-  // Meta para mostrar rango
+  // === Query reactivo para roles ===
+  readonly query = injectQuery<RolesApiResponse, Error, RolesApiResponse, readonly unknown[]>(() => {
+    const params: RolesParams = {
+      page: this.pageIndex() + 1,
+      limit: this.pageSize(),
+      search: this.backendSearch(),
+      includeColumns: true,
+      // sorting: this.sorting(), // Puedes descomentar si tu backend soporta sorting
+    };
+    return {
+      queryKey: this.svc.rolesKey(params),
+      queryFn: () => this.svc.fetchRoles(params),
+      keepPreviousData: true,
+      staleTime: 30_000,
+    };
+  });
+
   readonly meta = computed(() => this.query.data()?.meta ?? null);
   readonly rangeStart = computed(() => {
     const m = this.meta();
@@ -67,41 +101,21 @@ readonly backendSearch = computed(() => formatRoleName(this.debouncedSearch()));
     { key: 'delete',  label: 'Eliminar', icon: 'fa-solid fa-trash',         colorClass: 'text-red-600' },
   ]);
 
-  // Query reactivo: pide include=columns para columnas dinámicas
-  readonly query = injectQuery(() => {
-    const params: RolesParams = {
-      page: this.pageIndex() + 1,
-      limit: this.pageSize(),
-      search: this.backendSearch(), // ← search con debounce
-      includeColumns: true, // ← columnas dinámicas
-      // sorting: this.sorting(),
-    };
-    return {
-      queryKey: this.svc.rolesKey(params),
-      queryFn: () => this.svc.fetchRoles(params),
-      keepPreviousData: true,
-      staleTime: 30_000,
-    };
-  });
-
   constructor() {
-    // Procesa respuesta y prefetch
     effect(() => {
       const status = this.query.status();
       const response = this.query.data();
       if (status === 'error' || !response) return;
 
-      // Filas y meta
       this.rows.set(response.data);
       this.pageCount.set(response.meta.totalPages);
       this.totalCount.set(response.meta.total);
 
-      // Columnas: si el backend envió 'columns', mapea a ColumnDef; si no, deja las estáticas
       if (Array.isArray(response.columns) && response.columns.length > 0) {
         this.columns.set(mapApiColumnsToDefs(response.columns));
-      } // else: columnas estáticas ya estaban set
+      }
 
-      // Prefetch next/prev
+      // Prefetch de páginas (opcional)
       const nextPage = response.meta.page + 1;
       const prevPage = response.meta.page - 1;
       const params: RolesParams = {
@@ -115,27 +129,71 @@ readonly backendSearch = computed(() => formatRoleName(this.debouncedSearch()));
     });
   }
 
-  // Handlers
+  // === HANDLERS PARA TABLA Y BUSCADOR ===
   setPage(newPageZeroBased: number) { this.pageIndex.set(newPageZeroBased); }
   setPageSize(limit: number | string) {
     const parsed = typeof limit === 'string' ? parseInt(limit, 10) : limit;
     this.pageSize.set(parsed);
     this.pageIndex.set(0);
   }
-
   onSortingChange(next: Array<{ id: string; desc: boolean }>) { this.sorting.set(next); }
   onSearchChange(term: string) { this.search.set(term); }
   forceSearchNow() { /* injectQuery reconsulta al cambiar search() */ }
 
-  onEdit(row: Role) { /* TODO */ }
-  onDetails(row: Role) { /* TODO */ }
-  onDelete(row: Role) { /* TODO */ }
+  onEdit(row: Role) { /* TODO: editar rol */ }
+  onDetails(row: Role) { /* TODO: detalles del rol */ }
+  onDelete(row: Role) { /* TODO: eliminar rol */ }
 
   formatQueryError(err: unknown): string {
+    console.error('Error en query de roles:', err);
     if (!err) return '';
     if (typeof err === 'string') return err;
     if (err instanceof Error) return err.message;
     const anyErr = err as any;
     return String(anyErr?.message ?? anyErr?.error?.message ?? anyErr ?? '');
+  }
+
+  // === CREACIÓN DE ROL (modal + role-form) ===
+  onOpenForm() {
+    this.showForm.set(true);
+    this.formPending.set(false);
+    this.roleForm.reset({
+      name: '',
+      description: '',
+      isSystemRole: false
+    });
+  }
+
+  onCancelForm() {
+    this.showForm.set(false);
+    this.formPending.set(false);
+  }
+
+  onSubmitRole(role: Role) {
+    if (this.roleForm.invalid) {
+      this.roleForm.markAllAsTouched();
+      this.toast.show('Completa todos los campos requeridos', 'error');
+      return;
+    }
+    this.formPending.set(true);
+
+    this.svc.createRoleMutation.mutate(role, {
+      onSuccess: () => {
+        this.toast.show('¡Rol creado exitosamente!', 'success');
+        this.showForm.set(false);
+        this.formPending.set(false);
+        this.svc.invalidateRoles();
+      },
+      onError: (err: unknown) => {
+        this.formPending.set(false);
+        let errorMsg = 'Ocurrió un error al crear el rol';
+        if (err && typeof err === 'object' && 'error' in err) {
+          errorMsg = (err as any)?.error?.message ?? errorMsg;
+        } else if (typeof err === 'string') {
+          errorMsg = err;
+        }
+        this.toast.show(errorMsg, 'error');
+      }
+    });
   }
 }

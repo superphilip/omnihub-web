@@ -7,7 +7,6 @@ import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-exper
 // NGX-Translate
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 
-
 // Resto
 import { routes } from './app.routes';
 import { AuthInterceptor } from '@core/interceptor/auth.interceptor';
@@ -34,7 +33,11 @@ export const appConfig: ApplicationConfig = {
       })
     ),
 
-    provideHttpClient(withFetch(), withInterceptors([LanguageInterceptor, AuthInterceptor])),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([AuthInterceptor, LanguageInterceptor])
+    ),
+
     provideTanStackQuery(queryClient),
   ],
 };
