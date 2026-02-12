@@ -63,6 +63,11 @@ export function normalizeBackendErrors(error: unknown): NormalizedErrors {
     return result;
   }
 
+  if (error instanceof Error) {
+    result['general'] = [error.message];
+    return result;
+  }
+
   if (Array.isArray(error)) {
     error.forEach((item) => {
       if (!isObj(item)) return;

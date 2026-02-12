@@ -32,6 +32,7 @@
       [globalFilter]="search()"
       [totalPagesIn]="pageCount()"
       [totalCountIn]="totalCount()"
+      [pageIndexIn]="pageIndex()"
       (pageChange)="setPage($event)"
       (sortingChange)="onSortingChange($event)"
       [rowActions]="rowMenuItems"

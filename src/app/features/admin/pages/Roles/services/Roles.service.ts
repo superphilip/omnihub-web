@@ -1,4 +1,4 @@
-import { inject, Injectable, OnDestroy } from '@angular/core';
+import { inject, Injectable, OnDestroy, signal } from '@angular/core';
 import { ApiService } from '@core/services/api.service';
 import { QueryClient } from '@tanstack/angular-query-experimental';
 import { injectMutation } from '@tanstack/angular-query-experimental';
@@ -16,6 +16,7 @@ export type RolesParams = {
   sort?: string;
   order?: 'asc' | 'desc';
   includeColumns?: boolean;
+  lang?: string;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -24,6 +25,7 @@ export class RolesService implements OnDestroy {
   private qc = inject(QueryClient);
   private i18n = inject(I18nService);
   private sub: Subscription;
+
 
   constructor() {
     this.sub = this.i18n.valueChanges().subscribe(() => {
@@ -37,7 +39,7 @@ export class RolesService implements OnDestroy {
   }));
 
   rolesKey(params: RolesParams) {
-    const lang = this.i18n.current;
+    const lang = this.i18n.current ?? 'es';
     const page = Number(params.page ?? 1);
     const limit = Number(params.limit ?? 25);
     const search = params['search'] ?? '';
@@ -45,7 +47,16 @@ export class RolesService implements OnDestroy {
     const so = this.mapSortingToApi(params.sorting);
     const sort = params['sort'] ?? so.sort ?? '';
     const order = params['order'] ?? so.order ?? 'asc';
-    return ['roles', lang, page, limit, search, sort, order, includeColumns] as const;
+    return [
+      'roles',
+      lang, // <-- Aquí añades el idioma
+      page,
+      limit,
+      search,
+      sort,
+      order,
+      includeColumns,
+    ] as const;
   }
 
   fetchRoles$(params?: RolesParams): Observable<RolesApiResponse> {

@@ -22,6 +22,7 @@ export const AuthGuard: CanActivateFn = (route, state) => {
 
   // 1. Obtener el token de almacenamiento (localStorage)
   const accessToken = localStorage.getItem('accessToken');
+  const refreshToken = localStorage.getItem('refreshToken');
 
   // 2. Validar que exista y no esté vencido
   if (!accessToken || isTokenExpired(accessToken)) {

@@ -12,7 +12,8 @@ function isBrowser(): boolean {
 
 @Injectable({ providedIn: 'root' })
 export class I18nService {
-  private readonly current$ = new BehaviorSubject<Lang>(this.init());
+  current$ = new BehaviorSubject<Lang>(this.init());
+
 
   constructor(private translate: TranslateService) {
     const def = this.translate.getDefaultLang() ?? 'es';

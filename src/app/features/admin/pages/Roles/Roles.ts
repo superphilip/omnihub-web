@@ -3,7 +3,7 @@ import { injectQuery } from '@tanstack/angular-query-experimental';
 import { ColumnDef } from '@tanstack/angular-table';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Role, RolesApiResponse } from './interfaces/Roles';
 import { mapApiColumnsToDefs, staticRoleColumns } from './utils/ColumsFromBackend';
 import { formatRoleName } from '@core/utils/role.utils';
@@ -13,9 +13,15 @@ import { ActionItem } from 'src/app/shared/components/CustomActionsMenu/CustomAc
 import { TranslateModule } from '@ngx-translate/core';
 import { RolesParams, RolesService } from './services/Roles.service';
 import { CustomModal } from 'src/app/shared/components/CustomModal/CustomModal';
-
 import { ToastService } from '@core/services/Toast.service';
 import { RoleForm } from './components/RoleForm/RoleForm';
+import { I18nService } from '@core/services/I18.service';
+import { normalizeBackendErrors } from '@core/utils/error.utils';
+import { handleNormalizedErrors } from '@core/utils/formError.utils';
+import { Router } from '@angular/router';
+
+// === IMPORTA TUS UTILS ===
+
 
 @Component({
   selector: 'app-roles',
@@ -33,8 +39,10 @@ import { RoleForm } from './components/RoleForm/RoleForm';
 })
 export default class Roles {
   private readonly svc = inject(RolesService);
+  private readonly i18n = inject(I18nService);
   private readonly toast = inject(ToastService);
   private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
 
   // === UI state ===
   readonly search = signal('');
@@ -64,15 +72,17 @@ export default class Roles {
   );
   readonly debouncedSearch = toSignal(this.search$, { initialValue: '' });
   readonly backendSearch = computed(() => formatRoleName(this.debouncedSearch()));
+  readonly lang = toSignal(this.i18n.current$);  // Siendo current$ un observable público
 
   // === Query reactivo para roles ===
   readonly query = injectQuery<RolesApiResponse, Error, RolesApiResponse, readonly unknown[]>(() => {
+    const lang = this.lang();
     const params: RolesParams = {
       page: this.pageIndex() + 1,
       limit: this.pageSize(),
       search: this.backendSearch(),
       includeColumns: true,
-      // sorting: this.sorting(), // Puedes descomentar si tu backend soporta sorting
+      lang // <-- Incluyes lang si tu backend lo soporta, o solo en queryKey si no
     };
     return {
       queryKey: this.svc.rolesKey(params),
@@ -96,9 +106,9 @@ export default class Roles {
   });
 
   readonly rowMenuItems = (row: Role): readonly ActionItem[] => ([
-    { key: 'edit',    label: 'Editar',   icon: 'fa-solid fa-pen-to-square', colorClass: 'text-[#2B5797]' },
-    { key: 'details', label: 'Detalles', icon: 'fa-solid fa-circle-info',   colorClass: 'text-emerald-600' },
-    { key: 'delete',  label: 'Eliminar', icon: 'fa-solid fa-trash',         colorClass: 'text-red-600' },
+    { key: 'edit', label: 'Editar', icon: 'fa-solid fa-pen-to-square', colorClass: 'text-[#2B5797]' },
+    { key: 'details', label: 'Detalles', icon: 'fa-solid fa-circle-info', colorClass: 'text-emerald-600' },
+    { key: 'delete', label: 'Eliminar', icon: 'fa-solid fa-trash', colorClass: 'text-red-600' },
   ]);
 
   constructor() {
@@ -127,6 +137,12 @@ export default class Roles {
       if (nextPage <= response.meta.totalPages) this.svc.prefetchRoles({ ...params, page: nextPage });
       if (prevPage >= 1) this.svc.prefetchRoles({ ...params, page: prevPage });
     });
+    // Opcional: Para evitar overflow de página
+    effect(() => {
+      if (this.pageIndex() >= this.pageCount()) {
+        this.pageIndex.set(0);
+      }
+    });
   }
 
   // === HANDLERS PARA TABLA Y BUSCADOR ===
@@ -144,16 +160,15 @@ export default class Roles {
   onDetails(row: Role) { /* TODO: detalles del rol */ }
   onDelete(row: Role) { /* TODO: eliminar rol */ }
 
+  // Nuevo: ahora aprovechas la utilidad en cualquier error de backend
   formatQueryError(err: unknown): string {
-    console.error('Error en query de roles:', err);
-    if (!err) return '';
-    if (typeof err === 'string') return err;
-    if (err instanceof Error) return err.message;
-    const anyErr = err as any;
-    return String(anyErr?.message ?? anyErr?.error?.message ?? anyErr ?? '');
+    const normalized = normalizeBackendErrors(err);
+    const msg = (normalized['general'] && normalized['general'][0]) || 'Ocurrió un error inesperado en la consulta.';
+    console.error('Error en consulta de roles:', err, 'Normalized:', msg);
+    return msg;
   }
 
-  // === CREACIÓN DE ROL (modal + role-form) ===
+  // === CREACIÓN DE ROL (modal + role-form) usando utils ===
   onOpenForm() {
     this.showForm.set(true);
     this.formPending.set(false);
@@ -186,13 +201,26 @@ export default class Roles {
       },
       onError: (err: unknown) => {
         this.formPending.set(false);
-        let errorMsg = 'Ocurrió un error al crear el rol';
-        if (err && typeof err === 'object' && 'error' in err) {
-          errorMsg = (err as any)?.error?.message ?? errorMsg;
-        } else if (typeof err === 'string') {
-          errorMsg = err;
+        // Aquí aplicas el flujo pro:
+        const normalized = normalizeBackendErrors(err);
+        handleNormalizedErrors(normalized, this.roleForm, (msg) => this.toast.show(msg, 'error'));
+
+        const refreshError =
+          normalized['general'] &&
+          normalized['general'].some(msg =>
+            typeof msg === 'string' &&
+            msg.toLowerCase().includes('refresh token') && msg.toLowerCase().includes('inválido')
+          );
+
+        if (refreshError) {
+          // Borra auth, session, etc
+          localStorage.clear(); // o solo lo necesario
+          this.toast.show('Tu sesión expiró. Por favor inicia sesión de nuevo.', 'error');
+          this.router.navigate(['/login']);
+          return;
         }
-        this.toast.show(errorMsg, 'error');
+
+        handleNormalizedErrors(normalized, this.roleForm, (msg) => this.toast.show(msg, 'error'));
       }
     });
   }

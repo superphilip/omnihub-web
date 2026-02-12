@@ -38,6 +38,7 @@ export class TanTable<T extends BaseEntity> {
 
   totalPagesIn = input<number>(1);
   totalCountIn = input<number>(0);
+  pageIndexIn = input<number>(0);
 
   edit = output<T>();
   details = output<T>();
@@ -122,6 +123,12 @@ export class TanTable<T extends BaseEntity> {
       });
 
       this.tableSig.set(inst);
+    });
+    effect(() => {
+      const extIdx = this.pageIndexIn();
+      if (this.pageIndex() !== extIdx) {
+        this.pageIndex.set(extIdx);
+      }
     });
   }
 
