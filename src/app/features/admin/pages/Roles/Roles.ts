@@ -13,17 +13,21 @@ import { formatRoleName } from 'src/app/utils/role.utils';
 import { RolesService, RolesParams } from '../../services/Roles.service';
 import { Role } from '../../interfaces/Roles';
 import { mapApiColumnsToDefs, staticRoleColumns } from './ColumsFromBackend';
+import { required } from 'src/app/utils/validation.utils';
+import { FormBuilder } from '@angular/forms';
+import { CustomModal } from "@components/CustomModal/CustomModal";
+import { RoleForm } from "../../components/RoleForm/RoleForm";
 
 
 @Component({
   selector: 'app-roles',
   standalone: true,
-  imports: [CustomHeaderTable, TanTable],
+  imports: [CustomHeaderTable, TanTable, CustomModal, RoleForm],
   templateUrl: './Roles.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Roles {
-  private readonly svc = inject(RolesService);
+  readonly svc = inject(RolesService);
 
   readonly rowHeight = 48;
   readonly minHeight = computed(() => this.pageSize() * this.rowHeight + 60);
@@ -47,6 +51,8 @@ export default class Roles {
   readonly pageCount = signal(1);
   readonly totalCount = signal(0);
 
+  readonly createRoleModalOpen = signal(false);
+
   // Meta para mostrar rango
   readonly meta = computed(() => this.query.data()?.meta ?? null);
   readonly rangeStart = computed(() => {
@@ -66,6 +72,22 @@ export default class Roles {
     { key: 'details', label: 'Detalles', icon: 'fa-solid fa-circle-info', colorClass: 'text-emerald-600' },
     { key: 'delete', label: 'Eliminar', icon: 'fa-solid fa-trash', colorClass: 'text-red-600' },
   ]);
+
+  // Para el formulario reactivo
+  private fb = new FormBuilder();
+  readonly createRoleForm = signal(this.fb.group({
+    name: ['', required()],
+    description: ['', required()],
+    isSystemRole: [false]
+  }));
+
+  openCreateRoleModal() {
+    this.createRoleForm().reset({ name: '', description: '', isSystemRole: false });
+    this.createRoleModalOpen.set(true);
+  }
+  closeCreateRoleModal() {
+    this.createRoleModalOpen.set(false);
+  }
 
   readonly formattedSearch = computed(() => formatRoleName(this.debouncedSearch()));
   // Query reactivo: pide include=columns para columnas dinámicas

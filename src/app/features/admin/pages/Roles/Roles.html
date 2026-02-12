@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-4">
   <custom-header-table [title]="'GESTOR DE ROLES'" [subtitle]="'Gestiona y visualiza los roles del sistema'"
     [search]="search()" (searchChange)="onSearchChange($event)" (searchSubmit)="forceSearchNow()"
-    (searchBlur)="forceSearchNow()">
+    (searchBlur)="forceSearchNow()" (requestOpen)="openCreateRoleModal()">
     <div header-tools class="flex items-center gap-3">
       <label class="text-xs text-gray-500">Registros por página</label>
       <select class="select select-sm select-bordered" [value]="pageSize()"
@@ -13,35 +13,41 @@
       </select>
     </div>
   </custom-header-table>
-<div [style.min-height.px]="minHeight()" [style.transition]="'min-height 0.2s'">
-  @if (query.isError()) {
-  <div class="flex items-center gap-2 text-red-600 px-6 py-4">
-    <i class="fa-solid fa-triangle-exclamation"></i>
-    <span>Ocurrió un error cargando roles.</span>
-    <code class="text-xs text-red-700 bg-red-50 px-2 py-1 rounded">{{ formatQueryError(query.error()) }}</code>
-    <button class="btn btn-sm ml-auto" (click)="query.refetch()">Reintentar</button>
-  </div>
-  } @else if (query.isPending()) {
-  <div class="flex items-center justify-center py-12 text-[#2B5797]">
-    <i class="fa-solid fa-spinner animate-spin mr-2"></i>
-    <span>Cargando roles...</span>
-  </div>
-  } @else {
-  <tan-table [data]="rows()" [columns]="columns()" [pageSize]="pageSize()" [globalFilter]="formattedSearch()"
-    [totalPagesIn]="pageCount()" [totalCountIn]="totalCount()" (pageChange)="setPage($event)"
-    [currentPageIn]="pageIndex()" (sortingChange)="onSortingChange($event)" [rowActions]="rowMenuItems"
-    (edit)="onEdit($event)" (details)="onDetails($event)" (delete)="onDelete($event)">
-  </tan-table>
+  <div [style.min-height.px]="minHeight()" [style.transition]="'min-height 0.2s'">
+    @if (query.isError()) {
+    <div class="flex items-center gap-2 text-red-600 px-6 py-4">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>Ocurrió un error cargando roles.</span>
+      <code class="text-xs text-red-700 bg-red-50 px-2 py-1 rounded">{{ formatQueryError(query.error()) }}</code>
+      <button class="btn btn-sm ml-auto" (click)="query.refetch()">Reintentar</button>
+    </div>
+    } @else if (query.isPending()) {
+    <div class="flex items-center justify-center py-12 text-[#2B5797]">
+      <i class="fa-solid fa-spinner animate-spin mr-2"></i>
+      <span>Cargando roles...</span>
+    </div>
+    } @else {
+    <tan-table [data]="rows()" [columns]="columns()" [pageSize]="pageSize()" [globalFilter]="formattedSearch()"
+      [totalPagesIn]="pageCount()" [totalCountIn]="totalCount()" (pageChange)="setPage($event)"
+      [currentPageIn]="pageIndex()" (sortingChange)="onSortingChange($event)" [rowActions]="rowMenuItems"
+      (edit)="onEdit($event)" (details)="onDetails($event)" (delete)="onDelete($event)">
+    </tan-table>
 
-  @if (meta()) {
-  <div class="px-6 py-2 text-xs text-gray-500">
-    Mostrando
-    <span class="font-semibold text-[#2B5797]">{{ rangeStart() }}</span>
-    –
-    <span class="font-semibold text-[#2B5797]">{{ rangeEnd() }}</span>
-    de <span class="font-semibold text-[#2B5797]">{{ meta()?.total ?? 0 }}</span>
+    @if (meta()) {
+    <div class="px-6 py-2 text-xs text-gray-500">
+      Mostrando
+      <span class="font-semibold text-[#2B5797]">{{ rangeStart() }}</span>
+      –
+      <span class="font-semibold text-[#2B5797]">{{ rangeEnd() }}</span>
+      de <span class="font-semibold text-[#2B5797]">{{ meta()?.total ?? 0 }}</span>
+    </div>
+    }
+    }
   </div>
-  }
-  }
-  </div>
+  <custom-modal [open]="createRoleModalOpen()" [title]="'Crear nuevo rol'" (close)="closeCreateRoleModal()"
+    [maxWidth]="'540px'">
+    <role-form [formGroup]="createRoleForm()" [mutationFn]="svc.createRoleMutation.mutate"
+      (success)="query.refetch()" (cancel)="closeCreateRoleModal()" modal-body>
+    </role-form>
+  </custom-modal>
 </div>

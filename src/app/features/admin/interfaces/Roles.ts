@@ -18,6 +18,12 @@ export interface Role {
   updatedAt?: string | Date;
 }
 
+export interface CreateRole {
+  name: string;
+  description?: string;
+  isSystemRole: boolean;
+}
+
 export interface RolesApiResponse {
   data: Role[];
   meta: {

@@ -1,3 +1,15 @@
+@if (errorMsg()) {
+  <div class="mb-3 rounded bg-red-100 text-red-700 px-4 py-2 text-sm font-semibold flex items-center gap-2">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    {{ errorMsg() }}
+  </div>
+}
+@if (successMsg()) {
+  <div class="mb-3 rounded bg-green-100 text-green-700 px-4 py-2 text-sm font-semibold flex items-center gap-2">
+    <i class="fa-solid fa-check-circle"></i>
+    {{ successMsg() }}
+  </div>
+}
 <form [formGroup]="formGroup()" (ngSubmit)="onSubmit()" class="space-y-4" autocomplete="off">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <custom-input
@@ -17,7 +29,7 @@
 
   <label class="flex items-center gap-2">
     <input type="checkbox" formControlName="isSystemRole" class="checkbox checkbox-success" />
-    <span class="text-emerald-500">Es rol del sistema</span>
+    <span class="text-emerald-500">Rol principal con acceso a todo</span>
   </label>
 
   <div class="flex justify-end gap-3 pt-2">
