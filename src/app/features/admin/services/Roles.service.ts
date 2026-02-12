@@ -34,7 +34,7 @@ export class RolesService {
   fetchRoles$(params?: RolesParams) {
     const page = Number(params?.page ?? 1);
     const limit = Number(params?.limit ?? 25);
-    const search = params?.search;
+    const search = params?.search?.trim() ?? '';
     const includeColumns = !!params?.includeColumns;
 
     const so = this.mapSortingToApi(params?.sorting);

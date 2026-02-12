@@ -6,6 +6,10 @@ import { CustomHeaderTable } from '@components/CustomHeaderTable/CustomHeaderTab
 import { TanTable } from '@components/TanTable/TanTable';
 import type { ActionItem } from '@components/CustomActionsMenu/CustomActionsMenu';
 
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs';
+import { formatRoleName } from 'src/app/utils/role.utils';
+
 import { RolesService, RolesParams } from '../../services/Roles.service';
 import { Role } from '../../interfaces/Roles';
 import { mapApiColumnsToDefs, staticRoleColumns } from './ColumsFromBackend';
@@ -23,6 +27,12 @@ export default class Roles {
 
   // UI state
   readonly search = signal('');
+  private readonly search$ = toObservable(this.search).pipe(
+    map(v => v?.trim() ?? ''),
+    debounceTime(300), // puedes ajustar el tiempo
+    distinctUntilChanged()
+  );
+  readonly debouncedSearch = toSignal(this.search$, { initialValue: '' });
   readonly pageSize = signal(10);
   readonly pageIndex = signal(0);
 
@@ -54,12 +64,14 @@ export default class Roles {
     { key: 'delete', label: 'Eliminar', icon: 'fa-solid fa-trash', colorClass: 'text-red-600' },
   ]);
 
+  readonly formattedSearch = computed(() => formatRoleName(this.debouncedSearch()));
   // Query reactivo: pide include=columns para columnas dinámicas
   readonly query = injectQuery(() => {
+
     const params: RolesParams = {
       page: this.pageIndex() + 1,
       limit: this.pageSize(),
-      search: this.search(),
+      search: this.formattedSearch(),
       includeColumns: true, // ← columnas dinámicas
       // sorting: this.sorting(),
     };
@@ -101,7 +113,7 @@ export default class Roles {
       const params: RolesParams = {
         page: response.meta.page,
         limit: response.meta.limit,
-        search: this.search(),
+        search: this.formattedSearch(),
         includeColumns: true,
       };
       if (nextPage <= response.meta.totalPages) this.svc.prefetchRoles({ ...params, page: nextPage });

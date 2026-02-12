@@ -36,7 +36,7 @@
       [data]="rows()"
       [columns]="columns()"
       [pageSize]="pageSize()"
-      [globalFilter]="search()"
+      [globalFilter]="formattedSearch()"
       [totalPagesIn]="pageCount()"
       [totalCountIn]="totalCount()"
       (pageChange)="setPage($event)"
