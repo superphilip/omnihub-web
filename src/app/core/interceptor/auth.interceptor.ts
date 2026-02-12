@@ -6,14 +6,14 @@ import { catchError, filter, switchMap, take, throwError, tap } from 'rxjs';
 
 function isAuthUrl(url: string): boolean {
   const u = url.toLowerCase();
-  return u.includes('/auth/login') || u.includes('/auth/refresh') || u.includes('/auth/signup');
+  return u.includes('/auth/login') || u.includes('/auth/refresh');
 }
 
 export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenService = inject(AuthTokenService);
   const api = inject(ApiService);
 
-  // Excluir rutas de auth del flujo de autorización/refresh
+  // Excluir rutas de auth del refresh
   if (isAuthUrl(req.url)) {
     return next(req);
   }
@@ -31,7 +31,11 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error) => {
-      if (error instanceof HttpErrorResponse && error.status === 401 && !isAuthUrl(req.url)) {
+      if (
+        error instanceof HttpErrorResponse &&
+        error.status === 401 &&
+        !isAuthUrl(req.url)
+      ) {
         return handleRefresh(authReq, next, tokenService, api);
       }
       return throwError(() => error);
@@ -53,29 +57,40 @@ function handleRefresh(
     if (!refreshToken || tokenService.isTokenExpired(refreshToken)) {
       tokenService.isRefreshing = false;
       tokenService.logout();
+      tokenService.refreshTokenSubject.next('error'); // notifica error a los listeners
       return throwError(() => new Error('Refresh token inválido o vencido'));
     }
 
-    // Usa ApiService → environment.apiUrl ya incluye /api
-    return api.post<{ accessToken: string; refreshToken: string }>('auth/refresh', { refreshToken }).pipe(
+    // Primer request: inicia refresh, los demás esperan el token
+    return api.post<{ accessToken: string; refreshToken: string }>(
+      'auth/refresh',
+      { refreshToken }
+    ).pipe(
       tap(tokens => {
+        console.log('[AUTH] Nuevo refresh token recibido:', tokens.refreshToken);
         tokenService.isRefreshing = false;
         tokenService.setToken(tokens.accessToken);
         tokenService.setRefreshToken(tokens.refreshToken);
-        tokenService.refreshTokenSubject.next(tokens.accessToken);
+        tokenService.refreshTokenSubject.next(tokens.accessToken); // libera la cola
       }),
-      switchMap(tokens => next(req.clone({ setHeaders: { Authorization: tokens.accessToken } }))),
+      switchMap(tokens =>
+        next(req.clone({ setHeaders: { Authorization: tokens.accessToken } }))
+      ),
       catchError(err => {
         tokenService.isRefreshing = false;
         tokenService.logout();
+        tokenService.refreshTokenSubject.next('error'); // notifica error a los listeners
         return throwError(() => err);
       })
     );
   } else {
+    // Cualquier otra request debe esperar
     return tokenService.refreshTokenSubject.pipe(
-      filter(token => !!token),
+      filter(token => token !== null && token !== 'error'),
       take(1),
-      switchMap(token => next(req.clone({ setHeaders: { Authorization: token! } })))
+      switchMap(token =>
+        next(req.clone({ setHeaders: { Authorization: token! } }))
+      )
     );
   }
 }

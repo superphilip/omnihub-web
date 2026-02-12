@@ -29,7 +29,7 @@ export const AuthGuard: CanActivateFn = (route, state) => {
     localStorage.setItem('redirect', state.url);
     return router.createUrlTree(['/auth/login']);
   }
-
+  console.log('Guard check:', { accessToken, refreshToken, accessExpired: isTokenExpired(accessToken), refreshExpired: isTokenExpired(refreshToken) });
   // 5. Token válido: se permite la navegación
   return true;
 };
