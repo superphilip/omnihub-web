@@ -23,7 +23,7 @@ export default class Roles {
 
   // UI state
   readonly search = signal('');
-  readonly pageSize = signal(25);
+  readonly pageSize = signal(10);
   readonly pageIndex = signal(0);
 
   readonly sorting = signal<Array<{ id: string; desc: boolean }>>([]);
@@ -49,9 +49,9 @@ export default class Roles {
   });
 
   readonly rowMenuItems = (row: Role): readonly ActionItem[] => ([
-    { key: 'edit',    label: 'Editar',   icon: 'fa-solid fa-pen-to-square', colorClass: 'text-[#2B5797]' },
-    { key: 'details', label: 'Detalles', icon: 'fa-solid fa-circle-info',   colorClass: 'text-emerald-600' },
-    { key: 'delete',  label: 'Eliminar', icon: 'fa-solid fa-trash',         colorClass: 'text-red-600' },
+    { key: 'edit', label: 'Editar', icon: 'fa-solid fa-pen-to-square', colorClass: 'text-[#2B5797]' },
+    { key: 'details', label: 'Detalles', icon: 'fa-solid fa-circle-info', colorClass: 'text-emerald-600' },
+    { key: 'delete', label: 'Eliminar', icon: 'fa-solid fa-trash', colorClass: 'text-red-600' },
   ]);
 
   // Query reactivo: pide include=columns para columnas dinámicas
@@ -72,6 +72,13 @@ export default class Roles {
   });
 
   constructor() {
+    const isBrowser = typeof window !== 'undefined' && !!window.localStorage;
+    if (typeof window !== 'undefined' && !!window.localStorage) {
+      const savedPage = localStorage.getItem('rolesPage');
+      if (savedPage !== null && !isNaN(Number(savedPage))) {
+        this.pageIndex.set(Number(savedPage));
+      }
+    }
     // Procesa respuesta y prefetch
     effect(() => {
       const status = this.query.status();
@@ -103,12 +110,19 @@ export default class Roles {
   }
 
   // Handlers
-  setPage(newPageZeroBased: number) { this.pageIndex.set(newPageZeroBased); }
+  setPage(newPageZeroBased: number) {
+    if (typeof window !== 'undefined' && !!window.localStorage) {
+      localStorage.setItem('rolesPage', newPageZeroBased.toString());
+    }
+    this.pageIndex.set(newPageZeroBased);
+  }
   setPageSize(limit: number | string) {
     const parsed = typeof limit === 'string' ? parseInt(limit, 10) : limit;
     this.pageSize.set(parsed);
     this.pageIndex.set(0);
   }
+
+
 
   onSortingChange(next: Array<{ id: string; desc: boolean }>) { this.sorting.set(next); }
   onSearchChange(term: string) { this.search.set(term); }

@@ -44,6 +44,7 @@ export class TanTable<T extends BaseEntity> {
   readonly sorting = signal<SortingState>([]);
   readonly columnVisibility = signal<VisibilityState>({});
   readonly pageIndex = signal(0);
+  currentPageIn = input<number>(0); // Valor enviado por el padre
 
   private tableSig = signal<Table<any> | null>(null);
 
@@ -64,6 +65,13 @@ export class TanTable<T extends BaseEntity> {
       this.columnVisibility.set(vis);
       const inst = this.tableSig();
       if (inst) inst.setColumnVisibility(vis);
+    });
+
+    effect(() => {
+      const incoming = this.currentPageIn();
+      if (incoming !== this.pageIndex()) {
+        this.pageIndex.set(incoming);
+      }
     });
 
     // Instancia SIN paginación local (server-side)
@@ -133,18 +141,18 @@ export class TanTable<T extends BaseEntity> {
   getActions(row: T): readonly ActionItem[] {
     const builder = this.rowActions();
     return builder ? builder(row) : [
-      { key: 'edit',    label: 'Editar',   icon: 'fa-solid fa-pen-to-square', colorClass: 'text-[#2B5797]' },
-      { key: 'details', label: 'Detalles', icon: 'fa-solid fa-circle-info',   colorClass: 'text-emerald-600' },
-      { key: 'delete',  label: 'Eliminar', icon: 'fa-solid fa-trash',         colorClass: 'text-red-600' },
+      { key: 'edit', label: 'Editar', icon: 'fa-solid fa-pen-to-square', colorClass: 'text-[#2B5797]' },
+      { key: 'details', label: 'Detalles', icon: 'fa-solid fa-circle-info', colorClass: 'text-emerald-600' },
+      { key: 'delete', label: 'Eliminar', icon: 'fa-solid fa-trash', colorClass: 'text-red-600' },
     ];
   }
 
   onRowAction(action: string, row: T) {
     switch (action) {
-      case 'edit':    this.edit.emit(row);    break;
+      case 'edit': this.edit.emit(row); break;
       case 'details': this.details.emit(row); break;
-      case 'delete':  this.delete.emit(row);  break;
-      default:        console.warn('Acción desconocida:', action);
+      case 'delete': this.delete.emit(row); break;
+      default: console.warn('Acción desconocida:', action);
     }
   }
 

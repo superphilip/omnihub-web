@@ -40,6 +40,7 @@
       [totalPagesIn]="pageCount()"
       [totalCountIn]="totalCount()"
       (pageChange)="setPage($event)"
+      [currentPageIn]="pageIndex()"
       (sortingChange)="onSortingChange($event)"
       [rowActions]="rowMenuItems"
       (edit)="onEdit($event)"
