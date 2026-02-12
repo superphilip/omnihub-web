@@ -25,11 +25,8 @@ export const AuthGuard: CanActivateFn = (route, state) => {
   const refreshToken = localStorage.getItem('refreshToken');
 
   // 2. Validar que exista y no esté vencido
-  if (!accessToken || isTokenExpired(accessToken)) {
-    // 3. Opción: guardar a dónde quería ir el usuario, si deseas
+  if (!accessToken || isTokenExpired(accessToken) || !refreshToken || isTokenExpired(refreshToken)) {
     localStorage.setItem('redirect', state.url);
-
-    // 4. Redirigir a login (o la ruta pública que quieras)
     return router.createUrlTree(['/auth/login']);
   }
 

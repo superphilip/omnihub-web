@@ -22,23 +22,25 @@ export const RootGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const platformId = inject(PLATFORM_ID);
 
-  let token = '';
+  let accessToken = '';
+  let refreshToken = '';
   let loggedIn = false;
 
   if (isPlatformBrowser(platformId)) {
-    token = localStorage.getItem('accessToken') ?? '';
-    if (token) {
-      loggedIn = !isTokenExpired(token);
-      try {
-        const pureToken = token.startsWith('Bearer ') ? token.slice(7) : token;
-        const payload = JSON.parse(atob(pureToken.split('.')[1]));
-        console.log('PAYLOAD JWT:', payload);
-        console.log('LOGGEDIN?', loggedIn);
-      } catch {
-        console.log('JWT mal formado');
-      }
+  accessToken = localStorage.getItem('accessToken') ?? '';
+  refreshToken = localStorage.getItem('refreshToken') ?? '';
+  if (accessToken && refreshToken) {
+    loggedIn = !isTokenExpired(accessToken) && !isTokenExpired(refreshToken);
+    try {
+      const pureToken = accessToken.startsWith('Bearer ') ? accessToken.slice(7) : accessToken;
+      const payload = JSON.parse(atob(pureToken.split('.')[1]));
+      console.log('PAYLOAD JWT:', payload);
+      console.log('LOGGEDIN?', loggedIn);
+    } catch {
+      console.log('JWT mal formado');
     }
   }
+}
 
   return api.get<SetupStatusResponse>('setup/status').pipe(
     timeout({ each: 5000 }),
