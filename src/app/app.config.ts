@@ -35,7 +35,7 @@ export const appConfig: ApplicationConfig = {
 
     provideHttpClient(
       withFetch(),
-      withInterceptors([AuthInterceptor, LanguageInterceptor])
+      withInterceptors([LanguageInterceptor, AuthInterceptor])
     ),
 
     provideTanStackQuery(queryClient),

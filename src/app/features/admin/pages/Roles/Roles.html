@@ -1,73 +1,81 @@
 <div class="flex flex-col gap-4">
-  <custom-header-table
-    [title]="'roles.header.title' | translate"
-    [subtitle]="'roles.header.subtitle' | translate"
-    [search]="search()"
-    (searchChange)="onSearchChange($event)"
-    (searchSubmit)="forceSearchNow()"
-    (searchBlur)="forceSearchNow()"
-    (requestOpen)="onOpenForm()"
-  ></custom-header-table>
+  @if (authReady()) {
+    <custom-header-table
+      [title]="'roles.header.title' | translate"
+      [subtitle]="'roles.header.subtitle' | translate"
+      [search]="search()"
+      (searchChange)="onSearchChange($event)"
+      (searchSubmit)="forceSearchNow()"
+      (searchBlur)="forceSearchNow()"
+      (requestOpen)="onOpenForm()"
+    ></custom-header-table>
 
-  @if (query.isError()) {
-    <div class="flex items-center gap-2 text-red-600 px-6 py-4">
-      <i class="fa-solid fa-triangle-exclamation"></i>
-      <span>{{ 'errors.roles.load' | translate }}</span>
-      <code class="text-xs text-red-700 bg-red-50 px-2 py-1 rounded">{{ formatQueryError(query.error()) }}</code>
-      <button class="btn btn-sm ml-auto" (click)="query.refetch()">
-        {{ 'actions.retry' | translate }}
-      </button>
-    </div>
-  } @else if (query.isPending()) {
-    <div class="flex items-center justify-center py-12 text-[#2B5797]">
-      <i class="fa-solid fa-spinner animate-spin mr-2"></i>
-      <span>{{ 'loading.roles' | translate }}</span>
-    </div>
-  } @else {
-    <!-- TABLA DE ROLES -->
-    <tan-table
-      [data]="rows()"
-      [columns]="columns()"
-      [pageSize]="pageSize()"
-      [globalFilter]="search()"
-      [totalPagesIn]="pageCount()"
-      [totalCountIn]="totalCount()"
-      [pageIndexIn]="pageIndex()"
-      (pageChange)="setPage($event)"
-      (sortingChange)="onSortingChange($event)"
-      [rowActions]="rowMenuItems"
-      (edit)="onEdit($event)"
-      (details)="onDetails($event)"
-      (delete)="onDelete($event)">
-    </tan-table>
-
-    @if (meta()) {
-      <div class="px-6 py-2 text-xs text-gray-500">
-        {{ 'table.showing' | translate }}
-        <span class="font-semibold text-[#2B5797]">{{ rangeStart() }}</span>
-        –
-        <span class="font-semibold text-[#2B5797]">{{ rangeEnd() }}</span>
-        {{ 'table.of' | translate }}
-        <span class="font-semibold text-[#2B5797]">{{ meta()?.total ?? 0 }}</span>
+    @if (query.isError()) {
+      <div class="flex items-center gap-2 text-red-600 px-6 py-4">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>{{ 'errors.roles.load' | translate }}</span>
+        <code class="text-xs text-red-700 bg-red-50 px-2 py-1 rounded">{{ formatQueryError(query.error()) }}</code>
+        <button class="btn btn-sm ml-auto" (click)="query.refetch()">
+          {{ 'actions.retry' | translate }}
+        </button>
       </div>
-    }
-  }
+    } @else if (query.isPending()) {
+      <div class="flex items-center justify-center py-12 text-[#2B5797]">
+        <i class="fa-solid fa-spinner animate-spin mr-2"></i>
+        <span>{{ 'loading.roles' | translate }}</span>
+      </div>
+    } @else {
+      <!-- TABLA DE ROLES -->
+      <tan-table
+        [data]="rows()"
+        [columns]="columns()"
+        [pageSize]="pageSize()"
+        [globalFilter]="search()"
+        [totalPagesIn]="pageCount()"
+        [totalCountIn]="totalCount()"
+        [pageIndexIn]="pageIndex()"
+        (pageChange)="setPage($event)"
+        (sortingChange)="onSortingChange($event)"
+        [rowActions]="rowMenuItems"
+        (edit)="onEdit($event)"
+        (details)="onDetails($event)"
+        (delete)="onDelete($event)">
+      </tan-table>
 
-  <!-- MODAL Y FORM DE CREACIÓN -->
-  <custom-modal
-    [open]="showForm()"
-    [title]="'Nuevo rol'"
-    [maxWidth]="'640px'"
-    (close)="onCancelForm()"
-  >
-    <div modal-body>
-      <role-form
-        [formGroup]="roleForm"
-        [pending]="formPending()"
-        (submitForm)="onSubmitRole($event)"
-        (cancel)="onCancelForm()"
-      ></role-form>
+      @if (meta()) {
+        <div class="px-6 py-2 text-xs text-gray-500">
+          {{ 'table.showing' | translate }}
+          <span class="font-semibold text-[#2B5797]">{{ rangeStart() }}</span>
+          –
+          <span class="font-semibold text-[#2B5797]">{{ rangeEnd() }}</span>
+          {{ 'table.of' | translate }}
+          <span class="font-semibold text-[#2B5797]">{{ meta()?.total ?? 0 }}</span>
+        </div>
+      }
+    }
+
+    <!-- MODAL Y FORM DE CREACIÓN -->
+    <custom-modal
+      [open]="showForm()"
+      [title]="'Nuevo rol'"
+      [maxWidth]="'640px'"
+      (close)="onCancelForm()"
+    >
+      <div modal-body>
+        <role-form
+          [formGroup]="roleForm"
+          [pending]="formPending()"
+          (submitForm)="onSubmitRole($event)"
+          (cancel)="onCancelForm()"
+        ></role-form>
+      </div>
+      <div modal-footer></div>
+    </custom-modal>
+  } @else {
+    <!-- Loader bloque de sesión segura -->
+    <div class="flex flex-col items-center gap-4 p-10 text-[#2B5797]">
+      <span class="loading loading-dots loading-lg"></span>
+      <span class="mt-2">Cargando sesión segura...</span>
     </div>
-    <div modal-footer></div>
-  </custom-modal>
+  }
 </div>

@@ -1,4 +1,3 @@
-// auth-token.service.ts
 import { isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { Router } from '@angular/router';
@@ -7,12 +6,17 @@ import { BehaviorSubject } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class AuthTokenService {
   private router = inject(Router);
-  private platformId = inject(PLATFORM_ID); // Inyectamos el ID de plataforma
+  private platformId = inject(PLATFORM_ID);
 
   public isRefreshing = false;
+  /**
+   * Puede tener valores:
+   * - null: esperando refresh
+   * - string: hay accessToken usable (OK)
+   * - 'error': error de sesión/token
+   */
   public refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
-  // Helper para saber si estamos en el navegador
   private get isBrowser(): boolean {
     return isPlatformBrowser(this.platformId);
   }
@@ -27,6 +31,7 @@ export class AuthTokenService {
   setToken(token: string): void {
     if (this.isBrowser) {
       localStorage.setItem('accessToken', token);
+      console.log('[AUTH] setToken:', token);
     }
   }
 
@@ -40,6 +45,7 @@ export class AuthTokenService {
   setRefreshToken(token: string): void {
     if (this.isBrowser) {
       localStorage.setItem('refreshToken', token);
+      console.log('[AUTH] setRefreshToken:', token);
     }
   }
 
@@ -47,6 +53,7 @@ export class AuthTokenService {
     if (this.isBrowser) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      console.log('[AUTH] logout');
       this.router.navigate(['/login']);
     }
   }

@@ -19,6 +19,7 @@ import { I18nService } from '@core/services/I18.service';
 import { normalizeBackendErrors } from '@core/utils/error.utils';
 import { handleNormalizedErrors } from '@core/utils/formError.utils';
 import { Router } from '@angular/router';
+import { AuthTokenService } from '@core/services/AuthToken.service';
 
 // === IMPORTA TUS UTILS ===
 
@@ -43,6 +44,7 @@ export default class Roles {
   private readonly toast = inject(ToastService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly tokenService = inject(AuthTokenService);
 
   // === UI state ===
   readonly search = signal('');
@@ -56,6 +58,7 @@ export default class Roles {
   readonly totalCount = signal(0);
   readonly showForm = signal(false); // Visibilidad del modal
   readonly formPending = signal(false);
+  readonly authReady = computed(() => this.tokenService.refreshTokenSubject.value !== null);
 
   // === Formulario para crear rol ===
   roleForm = this.fb.group({
@@ -85,8 +88,12 @@ export default class Roles {
       lang // <-- Incluyes lang si tu backend lo soporta, o solo en queryKey si no
     };
     return {
+
       queryKey: this.svc.rolesKey(params),
-      queryFn: () => this.svc.fetchRoles(params),
+      queryFn: () => {
+
+        return this.svc.fetchRoles(params)
+      },
       keepPreviousData: true,
       staleTime: 30_000,
     };

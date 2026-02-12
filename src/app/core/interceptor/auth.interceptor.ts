@@ -13,7 +13,6 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenService = inject(AuthTokenService);
   const api = inject(ApiService);
 
-  // Excluir rutas de auth del refresh
   if (isAuthUrl(req.url)) {
     return next(req);
   }
@@ -57,36 +56,37 @@ function handleRefresh(
     if (!refreshToken || tokenService.isTokenExpired(refreshToken)) {
       tokenService.isRefreshing = false;
       tokenService.logout();
-      tokenService.refreshTokenSubject.next('error'); // notifica error a los listeners
+      tokenService.refreshTokenSubject.next('error'); // Notifica error a los listeners (UI)
       return throwError(() => new Error('Refresh token inválido o vencido'));
     }
 
-    // Primer request: inicia refresh, los demás esperan el token
+    // Primer request: inicia refresh, los demás esperan la signal
     return api.post<{ accessToken: string; refreshToken: string }>(
       'auth/refresh',
       { refreshToken }
     ).pipe(
       tap(tokens => {
-        console.log('[AUTH] Nuevo refresh token recibido:', tokens.refreshToken);
         tokenService.isRefreshing = false;
         tokenService.setToken(tokens.accessToken);
         tokenService.setRefreshToken(tokens.refreshToken);
-        tokenService.refreshTokenSubject.next(tokens.accessToken); // libera la cola
+        tokenService.refreshTokenSubject.next(tokens.accessToken); // Libera la cola
+        console.log('[AUTH] Refresh OK, nuevos tokens guardados');
       }),
       switchMap(tokens =>
         next(req.clone({ setHeaders: { Authorization: tokens.accessToken } }))
       ),
       catchError(err => {
+        console.error('[AUTH] Refresh FALLÓ', err);
         tokenService.isRefreshing = false;
         tokenService.logout();
-        tokenService.refreshTokenSubject.next('error'); // notifica error a los listeners
+        tokenService.refreshTokenSubject.next('error'); // Notifica error a los listeners
         return throwError(() => err);
       })
     );
   } else {
-    // Cualquier otra request debe esperar
+    // Cualquier otra request debe esperar a que se complete el refresh
     return tokenService.refreshTokenSubject.pipe(
-      filter(token => token !== null && token !== 'error'),
+      filter(token => !!token && token !== 'error'),
       take(1),
       switchMap(token =>
         next(req.clone({ setHeaders: { Authorization: token! } }))
