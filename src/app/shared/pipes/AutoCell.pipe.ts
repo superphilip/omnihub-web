@@ -20,7 +20,6 @@ export class AutoCellPipe implements PipeTransform {
       }
 
       // Convierte CONSTANTES en MAYÚSCULAS con guión bajo -> Title Case con espacios
-      // SUPER_ADMIN -> "Super Admin"
       if (/^[A-Z_]+$/.test(v)) {
         return v
           .split('_')
@@ -39,6 +38,13 @@ export class AutoCellPipe implements PipeTransform {
           return `${y}/${m}/${d}`;
         }
       }
+
+      // Acorta strings largos (aplica a todo lo demás: name, description, etc)
+      const maxLen = 30;
+      if (v.length > maxLen) {
+        return v.slice(0, maxLen) + '...';
+      }
+
     }
 
     // Timestamps numéricos (ms) o Date objeto

@@ -1,5 +1,6 @@
 import { FormGroup } from '@angular/forms';
-import { NormalizedErrors } from './error.utils'; // asume que tienes tus types
+import { NormalizedErrors } from '@core/utils/error.utils';
+
 
 export function handleNormalizedErrors(
   normalized: NormalizedErrors,

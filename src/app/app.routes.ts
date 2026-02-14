@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
-import { Root } from '@components/Root/Root';
+
 
 import { AuthGuard } from '@core/guards/auth-guard';
 import { PublicGuard } from '@core/guards/public-guard';
 import { RootGuard } from '@core/guards/root-guard';
 import { setupGuard } from '@core/guards/ssetup-guard';
+import { Root } from './shared/components/Root/Root';
 
 
 export const routes: Routes = [

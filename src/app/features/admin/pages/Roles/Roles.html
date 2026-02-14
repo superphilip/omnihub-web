@@ -2,17 +2,27 @@
   <custom-header-table [title]="'GESTOR DE ROLES'" [subtitle]="'Gestiona y visualiza los roles del sistema'"
     [search]="search()" (searchChange)="onSearchChange($event)" (searchSubmit)="forceSearchNow()"
     (searchBlur)="forceSearchNow()" (requestOpen)="openCreateRoleModal()">
-    <div header-tools class="flex items-center gap-3">
+    <div header-tools class="flex items-center gap-2">
+      <div class="inline-block text-xs font-semibold text-[#2B5797] bg-blue-50 rounded-lg px-1 py-2
+                  shadow-sm border border-blue-100">
+        @if (totalCount() > 0) {
+          Mostrando
+          <span>{{ rangeStart() }}</span> –
+          <span>{{ rangeEnd() }}</span>
+          de <span>{{ totalCount() }}</span>
+          registros
+        } @else {
+          Sin registros para mostrar
+        }
+      </div>
+      <!-- Aquí puedes agregar otros controles como paginador-per-page -->
+      <!--
       <label class="text-xs text-gray-500">Registros por página</label>
-      <select class="select select-sm select-bordered" [value]="pageSize()"
-        (change)="setPageSize($any($event.target).value)">
-        <option [value]="10">10</option>
-        <option [value]="25">25</option>
-        <option [value]="50">50</option>
-        <option [value]="100">100</option>
-      </select>
+      <select ...></select>
+      -->
     </div>
   </custom-header-table>
+
   <div [style.min-height.px]="minHeight()" [style.transition]="'min-height 0.2s'">
     @if (query.isError()) {
     <div class="flex items-center gap-2 text-red-600 px-6 py-4">
@@ -32,22 +42,13 @@
       [currentPageIn]="pageIndex()" (sortingChange)="onSortingChange($event)" [rowActions]="rowMenuItems"
       (edit)="onEdit($event)" (details)="onDetails($event)" (delete)="onDelete($event)">
     </tan-table>
-
-    @if (meta()) {
-    <div class="px-6 py-2 text-xs text-gray-500">
-      Mostrando
-      <span class="font-semibold text-[#2B5797]">{{ rangeStart() }}</span>
-      –
-      <span class="font-semibold text-[#2B5797]">{{ rangeEnd() }}</span>
-      de <span class="font-semibold text-[#2B5797]">{{ meta()?.total ?? 0 }}</span>
-    </div>
-    }
     }
   </div>
+
   <custom-modal [open]="createRoleModalOpen()" [title]="'Crear nuevo rol'" (close)="closeCreateRoleModal()"
     [maxWidth]="'540px'">
-    <role-form [formGroup]="createRoleForm()" [mutationFn]="svc.createRoleMutation.mutate"
-      (success)="query.refetch()" (cancel)="closeCreateRoleModal()" modal-body>
+    <role-form [formGroup]="createRoleForm()" [mutationFn]="svc.createRoleMutation.mutate" (success)="query.refetch()"
+      (cancel)="closeCreateRoleModal()" modal-body>
     </role-form>
   </custom-modal>
 </div>

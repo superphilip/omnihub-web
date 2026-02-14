@@ -2,21 +2,25 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { injectQuery } from '@tanstack/angular-query-experimental';
 import { ColumnDef } from '@tanstack/angular-table';
 
-import { CustomHeaderTable } from '@components/CustomHeaderTable/CustomHeaderTable';
-import { TanTable } from '@components/TanTable/TanTable';
-import type { ActionItem } from '@components/CustomActionsMenu/CustomActionsMenu';
+
 
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs';
-import { formatRoleName } from 'src/app/utils/role.utils';
+import { formatRoleName } from 'src/app/features/admin/pages/Roles/utils/role.utils';
 
-import { RolesService, RolesParams } from '../../services/Roles.service';
-import { Role } from '../../interfaces/Roles';
-import { mapApiColumnsToDefs, staticRoleColumns } from './ColumsFromBackend';
-import { required } from 'src/app/utils/validation.utils';
+
+import { Role } from './interfaces/Roles';
+
+import { required } from '@core/utils/validation.utils';
 import { FormBuilder } from '@angular/forms';
-import { CustomModal } from "@components/CustomModal/CustomModal";
+
 import { RoleForm } from "../../components/RoleForm/RoleForm";
+import { mapApiColumnsToDefs, staticRoleColumns } from './utils/ColumsFromBackend';
+import { RolesParams, RolesService } from './services/Roles.service';
+import { CustomHeaderTable } from 'src/app/shared/components/CustomHeaderTable/CustomHeaderTable';
+import { TanTable } from 'src/app/shared/components/TanTable/TanTable';
+import { CustomModal } from 'src/app/shared/components/CustomModal/CustomModal';
+import { ActionItem } from 'src/app/shared/components/CustomActionsMenu/CustomActionsMenu';
 
 
 @Component({

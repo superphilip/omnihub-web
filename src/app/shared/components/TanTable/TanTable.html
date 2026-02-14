@@ -1,0 +1,89 @@
+<div class="flex flex-col min-h-screen bg-gray-50 px-0">
+  <div class="w-full mx-auto bg-white rounded-xl shadow-md border border-[#e0e3e8] flex flex-col mt-4 mb-8">
+    <!-- solo scroll horizontal, altura automática -->
+    <div class="overflow-x-auto rounded-xl">
+      <table class="w-full min-w-150 border-separate border-spacing-0">
+        <thead>
+          @for (hg of headerGroups(); track hg.id) {
+            <tr class="bg-gray-50/50">
+              @for (header of hg.headers; track header.id) {
+                @if (!header.isPlaceholder) {
+                  <th
+                    (click)="toggleSort(header)"
+                    class="
+                      sticky top-0 bg-gray-50/50 z-20 shadow-sm
+                      cursor-pointer select-none text-[#2B5797] font-bold uppercase tracking-wider border-b border-gray-100 py-4 px-2
+                      text-[10px] sm:text-[11px]
+                      sm:px-4
+                      transition-colors
+                    ">
+                    <div class="flex items-center gap-1">
+                      {{ header.column.columnDef.header ?? header.column.id }}
+                      @if (header.column.getIsSorted() === 'asc') { <span class="text-[#2B5797]">▲</span> }
+                      @else if (header.column.getIsSorted() === 'desc') { <span class="text-[#2B5797]">▼</span> }
+                    </div>
+                  </th>
+                } @else {
+                  <th class="border-b border-gray-100 py-4 px-2 sticky top-0 bg-gray-50/50 z-20 shadow-sm"></th>
+                }
+              }
+              <th class="text-center text-[#2B5797] font-bold uppercase border-b border-gray-100 sticky top-0 bg-gray-50/50 z-20 shadow-sm px-2 sm:px-4 text-[11px]">SHARES</th>
+            </tr>
+          }
+        </thead>
+        <tbody>
+          @for (row of tableRows(); track row.id) {
+            <tr class="hover:bg-blue-50/20 transition-colors border-b border-gray-50">
+              @for (cell of row.getVisibleCells(); track cell.id) {
+                <td class="text-sm text-gray-700 py-4 px-2 truncate min-w-25 sm:px-4">
+                  {{ cell.getValue() | autoCell: ($any(cell.column.id)) }}
+                </td>
+              }
+              <td class="text-left py-4 pr-2 sm:pr-4">
+                <custom-actions-menu
+                  [items]="getActions(row.original)"
+                  (action)="onRowAction($event, row.original)">
+                </custom-actions-menu>
+              </td>
+            </tr>
+          }
+          @if (tableRows().length === 0) {
+            <tr>
+              <td class="text-center text-gray-400 py-6"
+                  [attr.colspan]="(headerGroups()[0]?.headers?.length ?? 0) + 1">
+                Sin registros.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PAGINADOR FLOTANTE -->
+  <div class="fixed bottom-4 left-0 w-full flex justify-center z-50 pointer-events-none">
+    <div class="pointer-events-auto bg-white border-2 border-[#2B5797] rounded-xl shadow-lg px-4 py-1 flex items-center gap-3 max-w-xs w-full"
+         style="backdrop-filter: blur(4px);">
+      <div class="text-xs font-bold text-[#2B5797] whitespace-nowrap">
+        Página <span>{{ currentPageIndex() + 1 }}</span> de <span>{{ pageCount() }}</span>
+        <span class="mx-1">—</span>
+        Total <span>{{ totalRowCount() }}</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <button class="bg-white border border-[#2B5797] rounded-md w-6 h-6 text-[11px] font-bold shadow-sm hover:bg-[#2B5797] hover:text-white transition-all"
+          [disabled]="!canPrev()" (click)="prev()">‹</button>
+        @for (p of pages(); track p) {
+          <button class="border border-[#2B5797] rounded-md w-6 h-6 text-[11px] font-bold shadow-sm transition-all"
+            [ngClass]="(currentPageIndex() === p)
+              ? 'bg-[#2B5797] text-white hover:bg-[#245289]'
+              : 'bg-white text-[#2B5797] hover:bg-blue-50 hover:text-[#245289]'"
+            (click)="goTo(p)">
+            {{ p + 1 }}
+          </button>
+        }
+        <button class="bg-white border border-[#2B5797] rounded-md w-6 h-6 text-[11px] font-bold shadow-sm hover:bg-[#2B5797] hover:text-white transition-all"
+          [disabled]="!canNext()" (click)="next()">›</button>
+      </div>
+    </div>
+  </div>
+</div>

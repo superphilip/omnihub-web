@@ -1,5 +1,6 @@
 import { ColumnDef, createColumnHelper } from '@tanstack/angular-table';
-import type { Role, ApiColumnSpec } from '../../interfaces/Roles';
+import { ApiColumnSpec, Role } from '../interfaces/Roles';
+
 
 const ch = createColumnHelper<Role>();
 

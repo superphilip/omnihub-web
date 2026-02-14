@@ -3,12 +3,14 @@ import { ApiService } from '@core/services/api.service';
 import { injectMutation } from '@tanstack/angular-query-experimental';
 import { firstValueFrom } from 'rxjs';
 import { LoginRequest, LoginResponse } from '../interfaces/Login';
+import { AuthTokenService } from '@core/services/AuthToken.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LoginService {
   private api = inject(ApiService);
+  private tokenService = inject(AuthTokenService);
 
   loginMutation = injectMutation(() => ({
     mutationFn: (payload: LoginRequest) => {
@@ -19,8 +21,8 @@ export class LoginService {
     },
     onSuccess: (res) => {
       if (res?.accessToken && res?.refreshToken) {
-        localStorage.setItem('accessToken', res.accessToken);
-        localStorage.setItem('refreshToken', res.refreshToken);
+        this.tokenService.setToken(res.accessToken);
+        this.tokenService.setRefreshToken(res.refreshToken);
       }
       console.log('Servidor respondió OK:', res);
     },

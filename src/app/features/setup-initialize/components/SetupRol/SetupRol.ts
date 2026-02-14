@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CustomInput } from '@components/CustomInput/CustomInput';
-import { formatRoleName } from 'src/app/utils/role.utils';
-
+import { formatRoleName } from 'src/app/features/admin/pages/Roles/utils/role.utils';
 
 @Component({
   selector: 'setup-rol',

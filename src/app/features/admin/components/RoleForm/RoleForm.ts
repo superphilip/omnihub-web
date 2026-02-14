@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { CreateRole, Role } from '../../interfaces/Roles';
+import { CreateRole, Role } from '../../pages/Roles/interfaces/Roles';
 import { CustomInput } from "@components/CustomInput/CustomInput";
-import { formatRoleName } from 'src/app/utils/role.utils';
-import { normalizeBackendErrors } from 'src/app/utils/error.utils';
-import { handleNormalizedErrors } from 'src/app/utils/formError.utils';
+import { formatRoleName } from 'src/app/features/admin/pages/Roles/utils/role.utils';
+import { normalizeBackendErrors } from '@core/utils/error.utils';
+import { handleNormalizedErrors } from 'src/app/shared/utils/formError.utils';
+
 
 @Component({
   selector: 'role-form',

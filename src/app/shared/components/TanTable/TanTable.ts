@@ -12,7 +12,7 @@ import {
   type Updater,
 } from '@tanstack/angular-table';
 import { CustomActionsMenu, ActionItem } from '@components/CustomActionsMenu/CustomActionsMenu';
-import { AutoCellPipe } from '@core/pipes/AutoCell.pipe';
+import { AutoCellPipe } from 'src/app/shared/pipes/AutoCell.pipe';
 
 export interface BaseEntity { id: string | number; }
 

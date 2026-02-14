@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, input, output, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { AutoCellPipe } from '@core/pipes/AutoCell.pipe';
+import { AutoCellPipe } from 'src/app/shared/pipes/AutoCell.pipe';
 import { ActionItem, CustomActionsMenu } from '@components/CustomActionsMenu/CustomActionsMenu';
 
 export type SortDir = 'asc' | 'desc';
